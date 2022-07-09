@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vld.h>
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
@@ -12,12 +13,14 @@ TEST_CASE("Stack Allocator Test")
 	REQUIRE(alloc.capacity() != 0);
 	REQUIRE(alloc.capacity() == 10);
 
-	REQUIRE_NOTHROW(alloc.allocate(10));
-	alloc.deallocate(10);
+	int* pArr{};
+	REQUIRE_NOTHROW(pArr = alloc.allocate(10));
+	REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
+	pArr = nullptr;
 
 	REQUIRE_THROWS_AS(alloc.allocate(11), std::bad_alloc);
 
-	int* pArr = alloc.allocate(10);
+	pArr = alloc.allocate(10);
 	REQUIRE(pArr != nullptr);
 
 	for (int i{}; i < 10; ++i)
@@ -25,5 +28,10 @@ TEST_CASE("Stack Allocator Test")
 		REQUIRE(pArr + i != nullptr);
 	}
 
-	alloc.deallocate(10);
+	REQUIRE_THROWS_AS(alloc.deallocate(nullptr, 10), std::invalid_argument);
+	REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
+
+	int* pInt{ new int{} };
+	REQUIRE_THROWS_AS(alloc.deallocate(pInt, 10), std::invalid_argument);
+	delete pInt;
 }
