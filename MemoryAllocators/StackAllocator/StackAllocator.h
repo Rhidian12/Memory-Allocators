@@ -39,7 +39,24 @@ public:
 		}
 	}
 
+	void deallocate(pointer p, size_t n)
+	{
+		if (IsPointerInBuffer(p))
+		{
+			pStackPointer -= n;
+		}
+		else
+		{
+			throw std::invalid_argument{};
+		}
+	}
+
 private:
+	bool IsPointerInBuffer(const_pointer p) const
+	{
+		return std::greater<const_pointer>{}(p, pBegin) && std::less<const_pointer>{}(p, pEnd);
+	}
+
 	pointer pBegin;
 	pointer pEnd;
 	pointer pStackPointer;
