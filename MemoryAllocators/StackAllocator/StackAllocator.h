@@ -17,6 +17,12 @@ public:
 		pEnd = pBegin + N;
 		StackPointer = pBegin;
 	}
+	template<typename U>
+	StackAllocator(const StackAllocator<U, N>& other)
+		: pBegin{ other.pBegin }
+		, pEnd{ other.pEnd }
+		, StackPointer{ other.StackPointer }
+	{}
 
 	pointer allocate(const size_t amount)
 	{
