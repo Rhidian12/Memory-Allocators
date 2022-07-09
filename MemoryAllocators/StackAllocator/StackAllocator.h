@@ -83,6 +83,11 @@ public:
 		return pStackPointer - pBegin;
 	}
 
+	constexpr size_t max_size() const
+	{
+		return N;
+	}
+
 	pointer buffer() const
 	{
 		return pBegin;
