@@ -47,7 +47,7 @@ public:
 		}
 		else
 		{
-			throw std::invalid_argument{};
+			throw std::invalid_argument{ "pointer is not part of allocated memory" };
 		}
 	}
 
