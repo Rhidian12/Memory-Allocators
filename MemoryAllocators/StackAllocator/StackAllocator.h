@@ -74,7 +74,7 @@ public:
 private:
 	bool IsPointerInBuffer(const_pointer p) const
 	{
-		return std::greater<const_pointer>{}(p, pBegin) && std::less<const_pointer>{}(p, pEnd);
+		return std::greater_equal<const_pointer>{}(p, pBegin) && std::less<const_pointer>{}(p, pEnd);
 	}
 
 	pointer pBegin;
