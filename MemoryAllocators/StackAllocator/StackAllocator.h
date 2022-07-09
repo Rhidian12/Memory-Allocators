@@ -83,6 +83,9 @@ public:
 		return pStackPointer - pBegin;
 	}
 
+	template<typename U>
+	struct rebind { using other = StackAllocator<U, N>; };
+
 private:
 	bool IsPointerInBuffer(const_pointer p) const
 	{
