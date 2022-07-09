@@ -29,7 +29,13 @@ public:
 	{
 		if (nrOfElements <= std::distance(pStackPointer, pEnd))
 		{
-
+			pointer data = pStackPointer;
+			pStackPointer += nrOfElements;
+			return data;
+		}
+		else
+		{
+			throw std::bad_alloc{};
 		}
 	}
 
