@@ -56,6 +56,11 @@ public:
 		return N;
 	}
 
+	size_t size() const
+	{
+		return pStackPointer - pBegin;
+	}
+
 private:
 	bool IsPointerInBuffer(const_pointer p) const
 	{
