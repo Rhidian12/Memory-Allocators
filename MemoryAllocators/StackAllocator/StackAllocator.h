@@ -1,6 +1,7 @@
 #pragma once
 #include <stdlib.h> /* malloc */
 #include <memory> /* std::distance() */
+#include <stdexcept> /* std::invalid_argument */
 
 template<typename T, size_t N>
 class StackAllocator final
