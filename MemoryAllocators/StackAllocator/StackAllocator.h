@@ -67,6 +67,12 @@ public:
 		new (p) U{ args... };
 	}
 
+	template<typename U>
+	void destroy(U* p)
+	{
+		p->~U();
+	}
+
 	constexpr size_t capacity() const
 	{
 		return N;
