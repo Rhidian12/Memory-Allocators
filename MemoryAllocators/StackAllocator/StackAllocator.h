@@ -61,6 +61,12 @@ public:
 		}
 	}
 
+	template<typename U, typename ... Args>
+	void construct(U* p, Args&&... args)
+	{
+		new (p) U{ args... };
+	}
+
 	constexpr size_t capacity() const
 	{
 		return N;
