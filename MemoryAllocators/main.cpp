@@ -43,6 +43,15 @@ TEST_CASE("Stack Allocator Test")
 
 	SECTION("STL use")
 	{
-		
+		std::vector<int, StackAllocator<int, 10>> vec{};
+
+		REQUIRE_NOTHROW(vec.reserve(10));
+
+		for (int i{}; i < 10; ++i)
+		{
+			REQUIRE_NOTHROW(vec.push_back(i));
+		}
+
+		REQUIRE_THROWS(vec.push_back(10));
 	}
 }
