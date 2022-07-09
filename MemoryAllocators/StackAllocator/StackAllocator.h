@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h> /* malloc */
+#include <memory> /* std::distance() */
 
 template<typename T, size_t N>
 class StackAllocator final
@@ -15,22 +16,25 @@ public:
 	{
 		pBegin = malloc(N * sizeof(T));
 		pEnd = pBegin + N;
-		StackPointer = pBegin;
+		pStackPointer = pBegin;
 	}
 	template<typename U>
 	StackAllocator(const StackAllocator<U, N>& other)
 		: pBegin{ other.pBegin }
 		, pEnd{ other.pEnd }
-		, StackPointer{ other.StackPointer }
+		, pStackPointer{ other.pStackPointer }
 	{}
 
-	pointer allocate(const size_t amount)
+	pointer allocate(const size_t nrOfElements)
 	{
+		if (nrOfElements <= std::distance(pStackPointer, pEnd))
+		{
 
+		}
 	}
 
 private:
 	pointer pBegin;
 	pointer pEnd;
-	pointer StackPointer;
+	pointer pStackPointer;
 };
