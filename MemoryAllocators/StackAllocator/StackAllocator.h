@@ -27,7 +27,7 @@ public:
 
 	pointer allocate(const size_t nrOfElements)
 	{
-		if (nrOfElements <= std::distance(pStackPointer, pEnd))
+		if (nrOfElements <= static_cast<size_t>(std::distance(pStackPointer, pEnd)))
 		{
 			pointer data = pStackPointer;
 			pStackPointer += nrOfElements;
