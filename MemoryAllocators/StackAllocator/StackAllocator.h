@@ -26,6 +26,15 @@ public:
 		, pStackPointer{ other.pStackPointer }
 	{}
 
+	~StackAllocator()
+	{
+		delete pBegin;
+
+		pBegin = nullptr;
+		pEnd = nullptr;
+		pStackPointer = nullptr;
+	}
+
 	pointer allocate(const size_t nrOfElements)
 	{
 		if (nrOfElements <= static_cast<size_t>(std::distance(pStackPointer, pEnd)))
