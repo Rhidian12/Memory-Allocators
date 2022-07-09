@@ -83,6 +83,11 @@ public:
 		return pStackPointer - pBegin;
 	}
 
+	pointer buffer() const
+	{
+		return pBegin;
+	}
+
 	template<typename U>
 	struct rebind { using other = StackAllocator<U, N>; };
 
