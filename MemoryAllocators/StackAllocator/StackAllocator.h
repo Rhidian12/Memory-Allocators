@@ -14,7 +14,7 @@ public:
 
 	StackAllocator()
 	{
-		pBegin = malloc(N * sizeof(T));
+		pBegin = static_cast<int*>(malloc(N * sizeof(T)));
 		pEnd = pBegin + N;
 		pStackPointer = pBegin;
 	}
