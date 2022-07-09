@@ -12,6 +12,7 @@ TEST_CASE("Stack Allocator Test")
 
 	REQUIRE(alloc.capacity() != 0);
 	REQUIRE(alloc.capacity() == 10);
+	REQUIRE(alloc.size() == 0);
 
 	int* pArr{};
 	REQUIRE_NOTHROW(pArr = alloc.allocate(10));
@@ -22,6 +23,7 @@ TEST_CASE("Stack Allocator Test")
 
 	pArr = alloc.allocate(10);
 	REQUIRE(pArr != nullptr);
+	REQUIRE(alloc.size() == 10);
 
 	for (int i{}; i < 10; ++i)
 	{
