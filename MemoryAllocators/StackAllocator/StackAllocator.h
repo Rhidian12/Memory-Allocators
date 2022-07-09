@@ -101,3 +101,15 @@ private:
 	pointer pEnd;
 	pointer pStackPointer;
 };
+
+template<typename T, size_t N, typename U>
+bool operator==(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs)
+{
+	return lhs.buffer() == rhs.buffer();
+}
+
+template<typename T, size_t N, typename U>
+bool operator==(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs)
+{
+	return lhs.buffer() != rhs.buffer();
+}
