@@ -109,7 +109,7 @@ bool operator==(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs
 }
 
 template<typename T, size_t N, typename U>
-bool operator==(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs)
+bool operator!=(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs)
 {
 	return lhs.buffer() != rhs.buffer();
 }
