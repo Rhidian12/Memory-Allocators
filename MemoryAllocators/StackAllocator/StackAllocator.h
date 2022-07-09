@@ -51,6 +51,11 @@ public:
 		}
 	}
 
+	constexpr size_t capacity() const
+	{
+		return N;
+	}
+
 private:
 	bool IsPointerInBuffer(const_pointer p) const
 	{
