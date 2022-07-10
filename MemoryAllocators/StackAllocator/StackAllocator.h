@@ -2,45 +2,29 @@
 #include <stdlib.h> /* malloc */
 #include <memory> /* std::distance() */
 #include <stdexcept> /* std::invalid_argument */
+#include <iostream>
 
-template<typename T, size_t N>
+template<size_t N>
 class StackAllocator final
 {
 public:
-	using value_type = T;
-	using pointer = T*;
-	using const_pointer = const T*;
-	using reference = T&;
-	using const_reference = const T&;
-
 	StackAllocator()
-	{
-		pBegin = static_cast<int*>(malloc(N * sizeof(T)));
-		pEnd = pBegin + N;
-		pStackPointer = pBegin;
-	}
-	template<typename U>
-	StackAllocator(const StackAllocator<U, N>& other)
-		: pBegin{ other.pBegin }
-		, pEnd{ other.pEnd }
-		, pStackPointer{ other.pStackPointer }
+		: Buffer{}
+		, StackPointer{}
 	{}
 
 	~StackAllocator()
 	{
-		delete pBegin;
-
-		pBegin = nullptr;
-		pEnd = nullptr;
-		pStackPointer = nullptr;
+		std::cout << "Allocator Destroyed\n";
 	}
 
-	pointer allocate(const size_t nrOfElements)
+	template<typename T>
+	T* allocate(const size_t nrOfElements)
 	{
-		if (nrOfElements <= static_cast<size_t>(std::distance(pStackPointer, pEnd)))
+		if (nrOfElements * sizeof(T) <= N - StackPointer)
 		{
-			pointer data = pStackPointer;
-			pStackPointer += nrOfElements;
+			T* data = reinterpret_cast<T*>(&Buffer[StackPointer]);
+			StackPointer += nrOfElements * sizeof(T);
 			return data;
 		}
 		else
@@ -49,28 +33,17 @@ public:
 		}
 	}
 
-	void deallocate(pointer p, size_t n)
+	template<typename T>
+	void deallocate(T* p, size_t n)
 	{
 		if (IsPointerInBuffer(p))
 		{
-			pStackPointer -= n;
+			StackPointer -= n * sizeof(T);
 		}
 		else
 		{
 			throw std::invalid_argument{ "pointer is not part of allocated memory" };
 		}
-	}
-
-	template<typename U, typename ... Args>
-	void construct(U* p, Args&&... args)
-	{
-		new (p) U{ args... };
-	}
-
-	template<typename U>
-	void destroy(U* p)
-	{
-		p->~U();
 	}
 
 	constexpr size_t capacity() const
@@ -80,7 +53,7 @@ public:
 
 	size_t size() const
 	{
-		return pStackPointer - pBegin;
+		return StackPointer;
 	}
 
 	constexpr size_t max_size() const
@@ -88,33 +61,66 @@ public:
 		return N;
 	}
 
-	pointer buffer() const
+	char* buffer() const
 	{
-		return pBegin;
+		return Buffer;
 	}
-
-	template<typename U>
-	struct rebind { using other = StackAllocator<U, N>; };
 
 private:
-	bool IsPointerInBuffer(const_pointer p) const
+	template<typename T>
+	bool IsPointerInBuffer(const T* p) const
 	{
-		return std::greater_equal<const_pointer>{}(p, pBegin) && std::less<const_pointer>{}(p, pEnd);
+		return std::greater_equal<const T*>{}(p, reinterpret_cast<const T*>(&Buffer)) && std::less<const T*>{}(p, reinterpret_cast<const T*>(&Buffer + N));
 	}
 
-	pointer pBegin;
-	pointer pEnd;
-	pointer pStackPointer;
+	char Buffer[N];
+	size_t StackPointer;
 };
 
-template<typename T, size_t N, typename U>
-bool operator==(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs)
+template<typename T, typename Allocator>
+class STLStackAllocator final
 {
-	return lhs.buffer() == rhs.buffer();
-}
+public:
+	using value_type = T;
 
-template<typename T, size_t N, typename U>
-bool operator!=(const StackAllocator<T, N>& lhs, const StackAllocator<U, N>& rhs)
-{
-	return lhs.buffer() != rhs.buffer();
-}
+	STLStackAllocator() = delete;
+	STLStackAllocator(Allocator& alloc)
+		: _Allocator{ alloc }
+	{}
+	template<typename U>
+	STLStackAllocator(const STLStackAllocator<U, Allocator>& other) noexcept
+		: _Allocator(other._Allocator)
+	{}
+
+	~STLStackAllocator()
+	{
+		std::cout << "STL Allocator Destroyed\n";
+	}
+
+	T* allocate(const size_t nrOfElements)
+	{
+		return _Allocator.allocate<T>(nrOfElements);
+	}
+
+	void deallocate(T* p, size_t n)
+	{
+		_Allocator.deallocate<T>(p, n);
+	}
+
+	T* buffer() const
+	{
+		return reinterpret_cast<T*>(_Allocator.buffer());
+	}
+
+	bool operator==(const STLStackAllocator<T, Allocator>& rhs) const noexcept
+	{
+		return buffer() == rhs.buffer();
+	}
+
+	bool operator!=(const STLStackAllocator<T, Allocator>& rhs) const noexcept
+	{
+		return buffer() != rhs.buffer();
+	}
+
+	Allocator& _Allocator;
+};

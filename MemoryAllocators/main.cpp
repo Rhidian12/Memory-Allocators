@@ -11,29 +11,29 @@ TEST_CASE("Stack Allocator Test")
 {
 	SECTION("Non-STL use")
 	{
-		StackAllocator<int, 10> alloc{};
+		StackAllocator<10 * sizeof(int)> alloc{};
 
 		REQUIRE(alloc.capacity() != 0);
-		REQUIRE(alloc.capacity() == 10);
+		REQUIRE(alloc.capacity() / sizeof(int) == 10);
 		REQUIRE(alloc.size() == 0);
 
 		int* pArr{};
-		REQUIRE_NOTHROW(pArr = alloc.allocate(10));
+		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
 		REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
 		pArr = nullptr;
 
-		REQUIRE_THROWS_AS(alloc.allocate(11), std::bad_alloc);
+		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
 
-		pArr = alloc.allocate(10);
+		pArr = alloc.allocate<int>(10);
 		REQUIRE(pArr != nullptr);
-		REQUIRE(alloc.size() == 10);
+		REQUIRE(alloc.size() / sizeof(int) == 10);
 
 		for (int i{}; i < 10; ++i)
 		{
 			REQUIRE(pArr + i != nullptr);
 		}
 
-		REQUIRE_THROWS_AS(alloc.deallocate(nullptr, 10), std::invalid_argument);
+		REQUIRE_THROWS_AS(alloc.deallocate<int>(nullptr, 10), std::invalid_argument);
 		REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
 
 		int* pInt{ new int{} };
@@ -43,7 +43,11 @@ TEST_CASE("Stack Allocator Test")
 
 	SECTION("STL use")
 	{
-		std::vector<int, StackAllocator<int, 10>> vec{};
+		/* I want to test with 10 integers, so 10 * sizeof(int), but std::vector also automatically allocates std::_Container_proxy */
+		using StackAlloc = StackAllocator<10 * sizeof(int) + sizeof(std::_Container_proxy)>;
+
+		StackAlloc alloc{};
+		std::vector<int, STLStackAllocator<int, StackAlloc>> vec(alloc);
 
 		REQUIRE_NOTHROW(vec.reserve(10));
 
@@ -52,6 +56,7 @@ TEST_CASE("Stack Allocator Test")
 			REQUIRE_NOTHROW(vec.push_back(i));
 		}
 
-		REQUIRE_THROWS(vec.push_back(10));
+		/* any new reallocation will trigger a std::bad_alloc */
+		REQUIRE_THROWS_AS(vec.push_back(10), std::bad_alloc);
 	}
 }
