@@ -31,6 +31,12 @@ TEST_CASE("Stack Allocator Test")
 		for (int i{}; i < 10; ++i)
 		{
 			REQUIRE(pArr + i != nullptr);
+			pArr[i] = i;
+		}
+
+		for (int i{}; i < 10; ++i)
+		{
+			REQUIRE(pArr[i] == i);
 		}
 
 		REQUIRE_THROWS_AS(alloc.deallocate<int>(nullptr, 10), std::invalid_argument);
