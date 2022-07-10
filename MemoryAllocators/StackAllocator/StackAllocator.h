@@ -13,11 +13,6 @@ public:
 		, StackPointer{}
 	{}
 
-	~StackAllocator()
-	{
-		std::cout << "Allocator Destroyed\n";
-	}
-
 	template<typename T>
 	T* allocate(const size_t nrOfElements)
 	{
@@ -91,11 +86,6 @@ public:
 	STLStackAllocator(const STLStackAllocator<U, Allocator>& other) noexcept
 		: _Allocator(other._Allocator)
 	{}
-
-	~STLStackAllocator()
-	{
-		std::cout << "STL Allocator Destroyed\n";
-	}
 
 	T* allocate(const size_t nrOfElements)
 	{
