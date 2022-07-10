@@ -4,15 +4,19 @@ FreeListAllocator::FreeListAllocator()
 	: pStart{}
 	, TotalSize{ 1024 }
 	, UsedSize{}
+	, pFreeBlocks{}
 {
 	pStart = malloc(TotalSize);
+	pFreeBlocks = new Block[50]{};
 }
 FreeListAllocator::FreeListAllocator(const size_t size)
 	: pStart{}
 	, TotalSize{ size }
 	, UsedSize{}
+	, pFreeBlocks{}
 {
 	pStart = malloc(size);
+	pFreeBlocks = new Block[size]{};
 }
 
 FreeListAllocator::FreeListAllocator(FreeListAllocator&& other) noexcept
