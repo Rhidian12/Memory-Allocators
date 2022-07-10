@@ -8,6 +8,11 @@ public:
 	explicit FreeListAllocator();
 	explicit FreeListAllocator(const size_t size);
 
+	FreeListAllocator(const FreeListAllocator&) noexcept = delete;
+	FreeListAllocator(FreeListAllocator&& other) noexcept;
+	FreeListAllocator& operator=(const FreeListAllocator& ) noexcept = delete;
+	FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
+
 private:
 	void* pStart;
 	size_t TotalSize;
