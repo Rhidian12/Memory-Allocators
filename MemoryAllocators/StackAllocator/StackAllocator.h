@@ -1,6 +1,4 @@
 #pragma once
-#include <stdlib.h> /* malloc */
-#include <memory> /* std::distance() */
 #include <stdexcept> /* std::invalid_argument */
 #include <iostream>
 
