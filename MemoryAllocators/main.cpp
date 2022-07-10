@@ -49,6 +49,7 @@ TEST_CASE("Stack Allocator Test")
 		StackAlloc alloc{};
 		std::vector<int, STLStackAllocator<int, StackAlloc>> vec(alloc);
 
+		/* we have to reserve first, otherwise we cannot guarantee LIFO deallocation which will result in UB */
 		REQUIRE_NOTHROW(vec.reserve(10));
 
 		for (int i{}; i < 10; ++i)
