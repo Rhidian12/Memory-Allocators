@@ -21,12 +21,18 @@
     <ClCompile Include="StackAllocator\StackAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FreeListAllocator\FreeListAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StackAllocator\StackAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="catch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeListAllocator\FreeListAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
