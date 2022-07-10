@@ -6,7 +6,7 @@ template<size_t N>
 class StackAllocator final
 {
 public:
-	StackAllocator()
+	explicit StackAllocator()
 		: Buffer{}
 		, StackPointer{}
 	{}
