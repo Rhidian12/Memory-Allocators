@@ -1,13 +1,13 @@
 #include "FreeListAllocator.h"
 
 FreeListAllocator::FreeListAllocator()
-	: pStart{}
-	, TotalSize{ 1024 }
-	, UsedSize{}
-	, pFreeBlocks{}
+	: pPools{}
+	, AmountOfPools{ sizeof(pPools) / sizeof(Block) }
 {
-	pStart = malloc(TotalSize);
-	pFreeBlocks = new Block[50]{};
+	for (size_t i{}; i < AmountOfPools; ++i)
+	{
+		pPools[i] = new Block[16];
+	}
 }
 FreeListAllocator::FreeListAllocator(const size_t size)
 	: pStart{}
