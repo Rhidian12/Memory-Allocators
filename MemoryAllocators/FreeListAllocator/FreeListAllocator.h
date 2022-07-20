@@ -14,12 +14,17 @@ class FreeListAllocator final
 {
 public:
 	explicit FreeListAllocator();
-	explicit FreeListAllocator(const size_t size);
 
-	FreeListAllocator(const FreeListAllocator&) noexcept = delete;
-	FreeListAllocator(FreeListAllocator&& other) noexcept;
-	FreeListAllocator& operator=(const FreeListAllocator&) noexcept = delete;
-	FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
+	// FreeListAllocator(const FreeListAllocator&) noexcept = delete;
+	// FreeListAllocator(FreeListAllocator&& other) noexcept;
+	// FreeListAllocator& operator=(const FreeListAllocator&) noexcept = delete;
+	// FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
+
+	template<typename T>
+	void Allocate(const size_t nrOfElements)
+	{
+
+	}
 
 	template<typename T>
 	void Deallocate(T* p)
@@ -29,7 +34,7 @@ public:
 			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > pointer is null" };
 		}
 
-		Header* pHeader{ reinterpret_cast<Header*>(p - sizeof(Header)) };
+		// Header* pHeader{ reinterpret_cast<Header*>(p - sizeof(Header)) };
 
 
 	}
