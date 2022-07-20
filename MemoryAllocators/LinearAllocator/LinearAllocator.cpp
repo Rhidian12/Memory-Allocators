@@ -5,9 +5,13 @@
 LinearAllocator::LinearAllocator()
 	: pStart{}
 	, pCurrent{}
+	, pEnd{}
 {
-	pStart = malloc(256);
+	const size_t size{ 256 };
+
+	pStart = malloc(size);
 	pCurrent = pStart;
+	pEnd = reinterpret_cast<char*>(pStart) + size;
 }
 
 LinearAllocator::~LinearAllocator()
