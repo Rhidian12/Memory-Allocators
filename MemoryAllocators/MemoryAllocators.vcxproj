@@ -152,12 +152,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FreeListAllocator\FreeListAllocator.cpp" />
+    <ClCompile Include="LinearAllocator\LinearAllocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="StackAllocator\StackAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
     <ClInclude Include="FreeListAllocator\FreeListAllocator.h" />
+    <ClInclude Include="LinearAllocator\LinearAllocator.h" />
     <ClInclude Include="StackAllocator\StackAllocator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

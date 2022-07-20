@@ -24,6 +24,9 @@
     <ClCompile Include="FreeListAllocator\FreeListAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LinearAllocator\LinearAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StackAllocator\StackAllocator.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FreeListAllocator\FreeListAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearAllocator\LinearAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
