@@ -161,6 +161,7 @@
     <ClInclude Include="FreeListAllocator\FreeListAllocator.h" />
     <ClInclude Include="LinearAllocator\LinearAllocator.h" />
     <ClInclude Include="StackAllocator\StackAllocator.h" />
+    <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
