@@ -10,7 +10,7 @@ public:
 	~LinearAllocator();
 
 	template<typename T>
-	T* Allocate(const size_t nrOfElements)
+	T* allocate(const size_t nrOfElements)
 	{
 		if (nrOfElements == 0)
 		{
@@ -25,7 +25,7 @@ public:
 	}
 
 	template<typename T>
-	void Deallocate(T* p)
+	void deallocate(T* p)
 	{
 		if (!p)
 		{
