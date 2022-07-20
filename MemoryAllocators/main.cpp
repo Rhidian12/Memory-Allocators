@@ -6,6 +6,7 @@
 #include "catch.hpp"
 
 #include "StackAllocator/StackAllocator.h"
+#include "LinearAllocator/LinearAllocator.h"
 
 TEST_CASE("Stack Allocator Test")
 {
@@ -65,5 +66,46 @@ TEST_CASE("Stack Allocator Test")
 
 		/* any new reallocation will trigger a std::bad_alloc */
 		REQUIRE_THROWS_AS(vec.push_back(10), std::bad_alloc);
+	}
+}
+
+TEST_CASE("Linear Allocator Test")
+{
+	SECTION("Non-STL use")
+	{
+		LinearAllocator alloc{};
+
+		REQUIRE(alloc.capacity() != 0);
+		REQUIRE(alloc.capacity() / sizeof(int) == 10);
+		REQUIRE(alloc.size() == 0);
+
+		int* pArr{};
+		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
+		REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
+		pArr = nullptr;
+
+		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
+
+		pArr = alloc.allocate<int>(10);
+		REQUIRE(pArr != nullptr);
+		REQUIRE(alloc.size() / sizeof(int) == 10);
+
+		for (int i{}; i < 10; ++i)
+		{
+			REQUIRE(pArr + i != nullptr);
+			pArr[i] = i;
+		}
+
+		for (int i{}; i < 10; ++i)
+		{
+			REQUIRE(pArr[i] == i);
+		}
+
+		REQUIRE_THROWS_AS(alloc.deallocate<int>(nullptr, 10), std::invalid_argument);
+		REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
+
+		int* pInt{ new int{} };
+		REQUIRE_THROWS_AS(alloc.deallocate(pInt, 10), std::invalid_argument);
+		delete pInt;
 	}
 }
