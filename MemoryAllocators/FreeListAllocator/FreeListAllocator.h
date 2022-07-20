@@ -8,6 +8,7 @@ struct Block final
 {
 	size_t Size;
 	Block* pNext;
+	char Data[16];
 };
 
 class FreeListAllocator final
@@ -23,7 +24,12 @@ public:
 	template<typename T>
 	void Allocate(const size_t nrOfElements)
 	{
+		if (nrOfElements == 0)
+		{
+			throw std::invalid_argument{ "FreeListAllocator::Allocate() > Cannot allocate 0 elements" };
+		}
 
+		const size_t totalAllocationSize{ sizeof(Block) + nrOfElements * sizeof(T) };
 	}
 
 	template<typename T>
@@ -54,6 +60,14 @@ private:
 		nullptr, /* 32 bytes */
 		nullptr, /* 64 bytes */
 		nullptr /* > 64 bytes */
+	};
+	uint32_t PoolSizes[5] =
+	{
+		0, /* 8 bytes */
+		0, /* 16 bytes */
+		0, /* 32 bytes */
+		0, /* 64 bytes */
+		0 /* > 64 bytes */
 	};
 };
 
