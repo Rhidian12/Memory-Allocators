@@ -1,5 +1,6 @@
 #pragma once
 #include <stdexcept> /* std::invalid_argument */
+#include <functional> /* std::bad_function_call */
 
 #include "../Utils/Utils.h"
 
@@ -31,9 +32,9 @@ public:
 	}
 
 	template<typename T>
-	void deallocate(T* p)
+	void deallocate([[unused]] T* p)
 	{
-		throw std::bad_function_call{ "Not allowed to call deallocate() on a linear allocator "};
+		throw std::bad_function_call{};
 	}
 
 	size_t capacity() const { return reinterpret_cast<char*>(pEnd) - reinterpret_cast<char*>(pStart) - 1; }
