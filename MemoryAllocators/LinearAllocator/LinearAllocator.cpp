@@ -11,7 +11,7 @@ LinearAllocator::LinearAllocator()
 
 	pStart = malloc(size);
 	pCurrent = pStart;
-	pEnd = reinterpret_cast<char*>(pStart) + size;
+	pEnd = reinterpret_cast<char*>(pStart) + size + 1;
 }
 
 LinearAllocator::LinearAllocator(const size_t nrOfBytes)
@@ -21,7 +21,7 @@ LinearAllocator::LinearAllocator(const size_t nrOfBytes)
 {
 	pStart = malloc(nrOfBytes);
 	pCurrent = pStart;
-	pEnd = reinterpret_cast<char*>(pStart) + nrOfBytes;
+	pEnd = reinterpret_cast<char*>(pStart) + nrOfBytes + 1;
 }
 
 LinearAllocator::~LinearAllocator()

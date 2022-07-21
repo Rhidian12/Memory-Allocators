@@ -18,7 +18,7 @@ public:
 			throw std::invalid_argument{ "LinearAllocator::Allocate() > Cannot allocate 0 elements" };
 		}
 
-		if (reinterpret_cast<T*>(pCurrent) + nrOfElements > pEnd)
+		if (reinterpret_cast<T*>(pCurrent) + nrOfElements >= pEnd)
 		{
 			throw std::bad_alloc{};
 		}
@@ -57,5 +57,5 @@ public:
 private:
 	void* pStart;
 	void* pCurrent;
-	void* pEnd;
+	void* pEnd; /* points past allocated memory */
 };
