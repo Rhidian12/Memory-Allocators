@@ -19,9 +19,9 @@ public:
 
 		void* pData{ pCurrent };
 
-		reinterpret_cast<T*>(pCurrent) += nrOfElements;
+		pCurrent = reinterpret_cast<T*>(pCurrent) + nrOfElements;
 
-		return pData;
+		return reinterpret_cast<T*>(pData);
 	}
 
 	template<typename T>
