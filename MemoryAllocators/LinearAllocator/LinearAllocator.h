@@ -47,7 +47,7 @@ public:
 			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate before allocated memory" };
 		}
 
-		reinterpret_cast<char*>(pCurrent) -= sizeof(T);
+		pCurrent = reinterpret_cast<char*>(pCurrent) - sizeof(T);
 	}
 
 	size_t capacity() const { return reinterpret_cast<char*>(pEnd) - reinterpret_cast<char*>(pStart); }
