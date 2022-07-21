@@ -73,14 +73,17 @@ TEST_CASE("Linear Allocator Test")
 {
 	SECTION("Non-STL use")
 	{
-		LinearAllocator alloc{};
+		LinearAllocator alloc{ 40 };
 
 		REQUIRE(alloc.capacity() != 0);
+		REQUIRE(alloc.capacity() == 40);
 		REQUIRE(alloc.size() == 0);
 
 		int* pArr{};
 		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
+		REQUIRE(alloc.size() == 10);
 		REQUIRE_NOTHROW(alloc.deallocate(pArr));
+		REQUIRE(alloc.size() == 0);
 		pArr = nullptr;
 
 		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
