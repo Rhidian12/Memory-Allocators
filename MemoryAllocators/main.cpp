@@ -81,7 +81,7 @@ TEST_CASE("Linear Allocator Test")
 
 		int* pArr{};
 		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
-		REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
+		REQUIRE_NOTHROW(alloc.deallocate(pArr));
 		pArr = nullptr;
 
 		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
@@ -101,11 +101,11 @@ TEST_CASE("Linear Allocator Test")
 			REQUIRE(pArr[i] == i);
 		}
 
-		REQUIRE_THROWS_AS(alloc.deallocate<int>(nullptr, 10), std::invalid_argument);
-		REQUIRE_NOTHROW(alloc.deallocate(pArr, 10));
+		REQUIRE_THROWS_AS(alloc.deallocate<int>(nullptr), std::invalid_argument);
+		REQUIRE_NOTHROW(alloc.deallocate(pArr));
 
 		int* pInt{ new int{} };
-		REQUIRE_THROWS_AS(alloc.deallocate(pInt, 10), std::invalid_argument);
+		REQUIRE_THROWS_AS(alloc.deallocate(pInt), std::invalid_argument);
 		delete pInt;
 	}
 }
