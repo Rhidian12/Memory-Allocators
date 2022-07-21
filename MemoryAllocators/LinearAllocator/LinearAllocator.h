@@ -37,11 +37,6 @@ public:
 			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate past allocated memory" };
 		}
 
-		if (p != pCurrent)
-		{
-			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate not last allocated memory" };
-		}
-
 		if (p < pStart)
 		{
 			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate before allocated memory" };
