@@ -7,6 +7,7 @@ class LinearAllocator final
 {
 public:
 	explicit LinearAllocator();
+	explicit LinearAllocator(const size_t nrOfBytes);
 	~LinearAllocator();
 
 	template<typename T>

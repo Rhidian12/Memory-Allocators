@@ -14,6 +14,16 @@ LinearAllocator::LinearAllocator()
 	pEnd = reinterpret_cast<char*>(pStart) + size;
 }
 
+LinearAllocator::LinearAllocator(const size_t nrOfBytes)
+	: pStart{}
+	, pCurrent{}
+	, pEnd{}
+{
+	pStart = malloc(nrOfBytes);
+	pCurrent = pStart;
+	pEnd = reinterpret_cast<char*>(pStart) + nrOfBytes;
+}
+
 LinearAllocator::~LinearAllocator()
 {
 	free(pStart);
