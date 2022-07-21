@@ -18,6 +18,11 @@ public:
 			throw std::invalid_argument{ "LinearAllocator::Allocate() > Cannot allocate 0 elements" };
 		}
 
+		if (reinterpret_cast<T*>(pCurrent) + nrOfElements > pEnd)
+		{
+			throw std::bad_alloc{};
+		}
+
 		void* pData{ pCurrent };
 
 		pCurrent = reinterpret_cast<T*>(pCurrent) + nrOfElements;
