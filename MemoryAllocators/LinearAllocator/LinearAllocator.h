@@ -32,7 +32,7 @@ public:
 	}
 
 	template<typename T>
-	void deallocate([[unused]] T* p)
+	void deallocate([[maybe_unused]] T* p)
 	{
 		throw std::bad_function_call{};
 	}
