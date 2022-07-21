@@ -76,7 +76,6 @@ TEST_CASE("Linear Allocator Test")
 		LinearAllocator alloc{};
 
 		REQUIRE(alloc.capacity() != 0);
-		REQUIRE(alloc.capacity() / sizeof(int) == 10);
 		REQUIRE(alloc.size() == 0);
 
 		int* pArr{};
@@ -88,7 +87,6 @@ TEST_CASE("Linear Allocator Test")
 
 		pArr = alloc.allocate<int>(10);
 		REQUIRE(pArr != nullptr);
-		REQUIRE(alloc.size() / sizeof(int) == 10);
 
 		for (int i{}; i < 10; ++i)
 		{
