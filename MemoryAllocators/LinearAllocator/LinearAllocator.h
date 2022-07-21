@@ -33,22 +33,7 @@ public:
 	template<typename T>
 	void deallocate(T* p)
 	{
-		if (!p)
-		{
-			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate a nullptr" };
-		}
-
-		if (p > pEnd)
-		{
-			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate past allocated memory" };
-		}
-
-		if (p < pStart)
-		{
-			throw std::invalid_argument{ "LinearAllocator::Deallocate() > Cannot deallocate before allocated memory" };
-		}
-
-		pCurrent = reinterpret_cast<char*>(pCurrent) - sizeof(T);
+		throw std::bad_function_call{ "Not allowed to call deallocate() on a linear allocator "};
 	}
 
 	size_t capacity() const { return reinterpret_cast<char*>(pEnd) - reinterpret_cast<char*>(pStart) - 1; }
