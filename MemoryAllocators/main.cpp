@@ -81,7 +81,7 @@ TEST_CASE("Linear Allocator Test")
 
 		int* pArr{};
 		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
-		REQUIRE(alloc.size() == 10);
+		REQUIRE(alloc.size() == 40);
 		REQUIRE_NOTHROW(alloc.deallocate(pArr));
 		REQUIRE(alloc.size() == 0);
 		pArr = nullptr;
