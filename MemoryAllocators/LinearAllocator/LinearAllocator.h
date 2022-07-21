@@ -51,6 +51,7 @@ public:
 	}
 
 	size_t capacity() const { return reinterpret_cast<char*>(pEnd) - reinterpret_cast<char*>(pStart); }
+	size_t size() const { return reinterpret_cast<char*>(pCurrent) - reinterpret_cast<char*>(pStart); }
 
 private:
 	void* pStart;
