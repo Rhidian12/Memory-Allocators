@@ -1,14 +1,8 @@
 #include "FreeListAllocator.h"
 
 FreeListAllocator::FreeListAllocator()
-	: pPools{}
-	, AmountOfPools{ sizeof(pPools) / sizeof(Block) }
-	, PoolSizes{}
+	: pFreeBlocks{}
 {
-	const size_t size{ 16 };
-	for (size_t i{}; i < AmountOfPools; ++i)
-	{
-		pPools[i] = new Block[size];
-		PoolSizes[i] = size;
-	}
+	const size_t size{ 256 };
+	pFreeBlocks = static_cast<Block*>(malloc(size));
 }

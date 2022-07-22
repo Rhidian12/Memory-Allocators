@@ -4,11 +4,18 @@
 #include <stdexcept> /* std::invalid_argument */
 #include <assert.h> /* assert() */
 
+#include "../Utils/Utils.h"
+
 struct Block final
 {
 	size_t Size;
 	Block* pNext;
-	char Data[16];
+};
+
+struct Header final
+{
+	size_t Size;
+	size_t Adjustment;
 };
 
 class FreeListAllocator final
@@ -22,14 +29,105 @@ public:
 	// FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
 
 	template<typename T>
-	void Allocate(const size_t nrOfElements)
+	void allocate(const size_t nrOfElements, const size_t alignment)
 	{
 		if (nrOfElements == 0)
 		{
 			throw std::invalid_argument{ "FreeListAllocator::Allocate() > Cannot allocate 0 elements" };
 		}
 
-		const size_t totalAllocationSize{ sizeof(Block) + nrOfElements * sizeof(T) };
+		Block* pPreviousBlock = nullptr;
+		Block* pFreeBlock = pFreeBlocks;
+
+		Block* pPreviousBestFit = nullptr;
+		Block* pBestFit = nullptr;
+
+		size_t bestFitAdjustment = 0;
+		size_t bestFitTotalSize = 0;
+
+		while (pFreeBlock)
+		{
+			/* Alignment adjustment needed to store the Header */
+			const size_t adjustment{ Utils::AlignForward<Header>(pFreeBlock, alignment) };
+
+			/* Calculate total size */
+			const size_t totalSize{ nrOfElements * sizeof(T) + adjustment };
+
+			/* Is the current block a better fit than the current best fit? */
+			if (pFreeBlock->Size > totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
+			{
+				pPreviousBestFit = pPreviousBlock;
+				pBestFit = pFreeBlock;
+
+				bestFitAdjustment = adjustment;
+				bestFitTotalSize = totalSize;
+
+				/* Is the new current block a perfect fit? */
+				if (pFreeBlock->Size == totalSize)
+				{
+					break;
+				}
+			}
+
+			pPreviousBlock = pFreeBlock;
+			pFreeBlock = pFreeBlock->pNext;
+		}
+
+		if (!pBestFit)
+		{
+			throw std::bad_alloc{};
+		}
+
+		/* Can the best fit be split into two parts? */
+		if (pBestFit->Size - bestFitTotalSize > sizeof(Header))
+		{
+			/* Split the block into memory for the allocation and the remainder */
+
+			/* New block starts at best fit + size */
+			Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<char*>(pBestFit) + bestFitTotalSize) };
+
+			/* The new block has the remaining size */
+			pNewBlock->Size = pBestFit->Size - bestFitTotalSize;
+			/* The new block now points to the original block's next */
+			pNewBlock->pNext = pBestFit->pNext;
+
+			/* Instert the new block into the list */
+			/* By not pointing towards pNewBlock instead of pBestFit, we're removing it from the list */
+			if (pPreviousBestFit)
+			{
+				pPreviousBestFit->pNext = pNewBlock;
+			}
+			else
+			{
+				pFreeBlocks = pNewBlock;
+			}
+		}
+		else /* we can't split it into two */
+		{
+			/* Update the size to the entire best fit block size */
+			bestFitTotalSize = pBestFit->Size;
+
+			/* Remove pBestFit from the linked list */
+			if (pPreviousBestFit)
+			{
+				pPreviousBestFit->pNext = pBestFit->pNext;
+			}
+			else
+			{
+				pFreeBlocks = pBestFit->pNext;
+			}
+		}
+
+		/* Get the aligned address */
+		const size_t alignedAddress{ reinterpret_cast<char*>(pBestFit) + bestFitAdjustment };
+
+		/* Get the header from this aligned address */
+		Header* const pHeader{ reinterpret_cast<Header*>(alignedAddress - sizeof(Header)) };
+
+		pHeader->Size = bestFitTotalSize;
+		pHeader->Adjustment = bestFitAdjustment;
+
+		return reinterpret_cast<T*>(alignedAddress);
 	}
 
 	template<typename T>
@@ -46,29 +144,7 @@ public:
 	}
 
 private:
-	/* https://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2 */
-	bool IsPowerOfTwo(const size_t val) const { return (val & (val - 1)) == 0; }
-	/* https://embeddedartistry.com/blog/2017/02/22/generating-aligned-memory/ */
-	template<typename T>
-	size_t AlignForward(const T* p, const size_t wantedAlignment) const { return ((p + (wantedAlignment - 1)) & ~(wantedAlignment - 1)); }
-	
-	uint8_t AmountOfPools;
-	Block* pPools[5] =
-	{
-		nullptr, /* 8 bytes */
-		nullptr, /* 16 bytes */
-		nullptr, /* 32 bytes */
-		nullptr, /* 64 bytes */
-		nullptr /* > 64 bytes */
-	};
-	uint32_t PoolSizes[5] =
-	{
-		0, /* 8 bytes */
-		0, /* 16 bytes */
-		0, /* 32 bytes */
-		0, /* 64 bytes */
-		0 /* > 64 bytes */
-	};
+	Block* pFreeBlocks;
 };
 
 //template<typename T>
