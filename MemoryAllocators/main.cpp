@@ -110,15 +110,15 @@ TEST_CASE("FreeList Allocator Test")
 {
 	SECTION("Non-STL use")
 	{
-		FreeListAllocator alloc{ 40 };
+		FreeListAllocator alloc{ 48 }; /* 40 for 10 integers + 8 for the allocation header */
 
 		REQUIRE(alloc.capacity() != 0);
-		REQUIRE(alloc.capacity() == 40);
+		REQUIRE(alloc.capacity() == 48);
 		REQUIRE(alloc.size() == 0);
 
 		int* pArr{};
 		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
-		REQUIRE(alloc.size() == 40);
+		REQUIRE(alloc.size() == 1);
 		REQUIRE_NOTHROW(alloc.deallocate(pArr));
 
 		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
