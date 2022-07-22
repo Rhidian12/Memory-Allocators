@@ -131,7 +131,7 @@ public:
 	}
 
 	template<typename T>
-	void Deallocate(T* p)
+	void deallocate(T* p)
 	{
 		if (!p)
 		{
