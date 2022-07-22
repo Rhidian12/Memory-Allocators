@@ -213,6 +213,7 @@ public:
 	}
 
 	size_t capacity() const { return Capacity; }
+	size_t size() const { return Size; }
 
 private:
 	Block* pFreeBlocks;
