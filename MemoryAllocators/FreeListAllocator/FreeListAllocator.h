@@ -22,6 +22,9 @@ class FreeListAllocator final
 {
 public:
 	explicit FreeListAllocator();
+	explicit FreeListAllocator(const size_t size);
+
+	~FreeListAllocator();
 
 	// FreeListAllocator(const FreeListAllocator&) noexcept = delete;
 	// FreeListAllocator(FreeListAllocator&& other) noexcept;
