@@ -130,8 +130,7 @@ public:
 		return reinterpret_cast<T*>(alignedAddress);
 	}
 
-	template<typename T>
-	void deallocate(T* p)
+	void deallocate(void* p)
 	{
 		if (!p)
 		{
@@ -152,7 +151,7 @@ public:
 		/* Find the first block that starts after this heap of allocated memory */
 		while (pFreeBlock)
 		{
-			if (pFreeBlock >= blockEnd)
+			if (reinterpret_cast<size_t>(pFreeBlock) >= blockEnd)
 			{
 				break;
 			}
@@ -170,7 +169,7 @@ public:
 
 			pFreeBlocks = pPreviousFreeBlock;
 		}
-		else if (reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size == blockStart)
+		else if (reinterpret_cast<size_t>(reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size) == blockStart)
 		{
 			/* The block before (pPreviousFreeBlock) the block we're freeing (pFreeBlock) ends right on the boundary of the heap of allocated memory */
 			/* So we can merge the previous block and our heap of allocated memory together */
@@ -192,7 +191,8 @@ public:
 			pPreviousFreeBlock = pTemp;
 		}
 
-		if (reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size == pPreviousFreeBlock->pNext)
+		if (reinterpret_cast<size_t>(reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size) ==
+			reinterpret_cast<size_t>(pPreviousFreeBlock->pNext))
 		{
 			/* The new or merged block ends right on the next block of list, so we can merge these again */
 			pPreviousFreeBlock->Size += pPreviousFreeBlock->pNext->Size;
