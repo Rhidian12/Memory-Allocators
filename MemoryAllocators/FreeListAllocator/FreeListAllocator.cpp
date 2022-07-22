@@ -1,12 +1,8 @@
 #include "FreeListAllocator.h"
 
 FreeListAllocator::FreeListAllocator()
-	: pFreeBlocks{}
-	, Size{}
-	, Capacity{ 256 }
-{
-	pFreeBlocks = static_cast<Block*>(malloc(Capacity));
-}
+	: FreeListAllocator(256)
+{}
 
 FreeListAllocator::FreeListAllocator(const size_t size)
 	: pFreeBlocks{}
@@ -14,6 +10,9 @@ FreeListAllocator::FreeListAllocator(const size_t size)
 	, Capacity{ size }
 {
 	pFreeBlocks = static_cast<Block*>(malloc(size));
+
+	pFreeBlocks->pNext = nullptr;
+	pFreeBlocks->Size = size;
 }
 
 FreeListAllocator::~FreeListAllocator()
