@@ -32,7 +32,7 @@ public:
 	// FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
 
 	template<typename T>
-	void allocate(const size_t nrOfElements, const size_t alignment = sizeof(size_t))
+	T* allocate(const size_t nrOfElements, const size_t alignment = sizeof(size_t))
 	{
 		if (nrOfElements == 0)
 		{
