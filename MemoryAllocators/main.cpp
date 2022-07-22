@@ -7,6 +7,7 @@
 
 #include "StackAllocator/StackAllocator.h"
 #include "LinearAllocator/LinearAllocator.h"
+#include "FreeListAllocator/FreeListAllocator.h"
 
 TEST_CASE("Stack Allocator Test")
 {
@@ -101,6 +102,42 @@ TEST_CASE("Linear Allocator Test")
 
 		int* pInt{ new int{} };
 		REQUIRE_THROWS_AS(alloc.deallocate(pInt), std::bad_function_call);
+		delete pInt;
+	}
+}
+
+TEST_CASE("FreeList Allocator Test")
+{
+	SECTION("Non-STL use")
+	{
+		FreeListAllocator alloc{ 40 };
+
+		REQUIRE(alloc.capacity() != 0);
+		REQUIRE(alloc.capacity() == 40);
+		REQUIRE(alloc.size() == 0);
+
+		int* pArr{};
+		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
+		REQUIRE(alloc.size() == 40);
+		REQUIRE_NOTHROW(alloc.deallocate(pArr));
+
+		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
+
+		for (int i{}; i < 10; ++i)
+		{
+			REQUIRE(pArr + i != nullptr);
+			pArr[i] = i;
+		}
+
+		for (int i{}; i < 10; ++i)
+		{
+			REQUIRE(pArr[i] == i);
+		}
+
+		REQUIRE_THROWS_AS(alloc.deallocate(nullptr), std::invalid_argument);
+
+		int* pInt{ new int{} };
+		REQUIRE_THROWS_AS(alloc.deallocate(pInt), std::invalid_argument);
 		delete pInt;
 	}
 }
