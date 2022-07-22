@@ -130,6 +130,8 @@ public:
 		pHeader->Size = bestFitTotalSize;
 		pHeader->Adjustment = bestFitAdjustment;
 
+		++Size;
+
 		return reinterpret_cast<T*>(alignedAddress);
 	}
 
@@ -201,10 +203,14 @@ public:
 			pPreviousFreeBlock->Size += pPreviousFreeBlock->pNext->Size;
 			pPreviousFreeBlock->pNext = pPreviousFreeBlock->pNext->pNext;
 		}
+
+		--Size;
 	}
 
 private:
 	Block* pFreeBlocks;
+	size_t Size;
+	size_t Capacity;
 };
 
 //template<typename T>

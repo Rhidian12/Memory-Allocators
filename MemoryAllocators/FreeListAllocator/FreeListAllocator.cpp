@@ -2,13 +2,16 @@
 
 FreeListAllocator::FreeListAllocator()
 	: pFreeBlocks{}
+	, Size{}
+	, Capacity{ 256 }
 {
-	const size_t size{ 256 };
-	pFreeBlocks = static_cast<Block*>(malloc(size));
+	pFreeBlocks = static_cast<Block*>(malloc(Capacity));
 }
 
 FreeListAllocator::FreeListAllocator(const size_t size)
 	: pFreeBlocks{}
+	, Size{}
+	, Capacity{ size }
 {
 	pFreeBlocks = static_cast<Block*>(malloc(size));
 }
