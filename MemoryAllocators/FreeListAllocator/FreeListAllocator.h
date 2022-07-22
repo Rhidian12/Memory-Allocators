@@ -142,6 +142,11 @@ public:
 			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > pointer is null" };
 		}
 
+		if (p < pFreeBlocks || reinterpret_cast<size_t>(p) > reinterpret_cast<size_t>(pFreeBlocks) + Capacity)
+		{
+			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > Cannot deallocate memory not allocated by this allocator" };
+		}
+
 		/* Get the header from the memory we allocated */
 		Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<char*>(p) - sizeof(Header)) };
 
