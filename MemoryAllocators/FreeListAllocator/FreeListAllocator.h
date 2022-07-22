@@ -57,7 +57,7 @@ public:
 			const size_t totalSize{ nrOfElements * sizeof(T) + adjustment };
 
 			/* Is the current block a better fit than the current best fit? */
-			if (pFreeBlock->Size > totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
+			if (pFreeBlock->Size >= totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
 			{
 				pPreviousBestFit = pPreviousBlock;
 				pBestFit = pFreeBlock;
@@ -140,11 +140,6 @@ public:
 		if (!p)
 		{
 			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > pointer is null" };
-		}
-
-		if (p < pFreeBlocks || reinterpret_cast<size_t>(p) > reinterpret_cast<size_t>(pFreeBlocks) + Capacity)
-		{
-			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > Cannot deallocate memory not allocated by this allocator" };
 		}
 
 		/* Get the header from the memory we allocated */

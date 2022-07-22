@@ -136,8 +136,6 @@ TEST_CASE("FreeList Allocator Test")
 
 		REQUIRE_THROWS_AS(alloc.deallocate(nullptr), std::invalid_argument);
 
-		int* pInt{ new int{} };
-		REQUIRE_THROWS_AS(alloc.deallocate(pInt), std::invalid_argument);
-		delete pInt;
+		/* Deallocating memory not allocated by this allocator is UB */
 	}
 }
