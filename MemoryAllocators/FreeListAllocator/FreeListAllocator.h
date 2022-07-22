@@ -138,9 +138,66 @@ public:
 			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > pointer is null" };
 		}
 
-		// Header* pHeader{ reinterpret_cast<Header*>(p - sizeof(Header)) };
+		/* Get the header from the memory we allocated */
+		Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<char*>(p) - sizeof(Header)) };
 
+		/* Get the actual start of the allocation by moving backwards the amount specified by the header */
+		const size_t blockStart{ reinterpret_cast<size_t>(reinterpret_cast<char*>(p) - pHeader->Adjustment) };
+		const size_t blockSize{ pHeader->Size };
+		const size_t blockEnd{ blockStart + blockSize };
 
+		Block* pPreviousFreeBlock{};
+		Block* pFreeBlock{};
+
+		/* Find the first block that starts after this heap of allocated memory */
+		while (pFreeBlock)
+		{
+			if (pFreeBlock >= blockEnd)
+			{
+				break;
+			}
+
+			pPreviousFreeBlock = pFreeBlock;
+			pFreeBlock = pFreeBlock->pNext;
+		}
+
+		if (!pFreeBlock)
+		{
+			/* There is no free block after this heap of allocated memory, so add it to the start of the list */
+			pPreviousFreeBlock = reinterpret_cast<Block*>(blockStart);
+			pPreviousFreeBlock->Size = blockSize;
+			pPreviousFreeBlock->pNext = pFreeBlocks;
+
+			pFreeBlocks = pPreviousFreeBlock;
+		}
+		else if (reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size == blockStart)
+		{
+			/* The block before (pPreviousFreeBlock) the block we're freeing (pFreeBlock) ends right on the boundary of the heap of allocated memory */
+			/* So we can merge the previous block and our heap of allocated memory together */
+
+			pPreviousFreeBlock->Size += blockSize;
+		}
+		else
+		{
+			/* The block before (pPreviousBlock) the block we're freeing (pFreeBlock) does NOT end rightt on the boundary of the heap of allocated memory */
+			/* Therefore we cannot merge the two */
+			/* So, we have to create a new Block */
+
+			Block* const pTemp{ reinterpret_cast<Block*>(blockStart) };
+
+			pTemp->Size = blockSize;
+			pTemp->pNext = pPreviousFreeBlock->pNext;
+
+			pPreviousFreeBlock->pNext = pTemp;
+			pPreviousFreeBlock = pTemp;
+		}
+
+		if (reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size == pPreviousFreeBlock->pNext)
+		{
+			/* The new or merged block ends right on the next block of list, so we can merge these again */
+			pPreviousFreeBlock->Size += pPreviousFreeBlock->pNext->Size;
+			pPreviousFreeBlock->pNext = pPreviousFreeBlock->pNext->pNext;
+		}
 	}
 
 private:
