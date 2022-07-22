@@ -122,7 +122,7 @@ public:
 		}
 
 		/* Get the aligned address */
-		const size_t alignedAddress{ reinterpret_cast<char*>(pBestFit) + bestFitAdjustment };
+		const size_t alignedAddress{ reinterpret_cast<size_t>(reinterpret_cast<char*>(pBestFit) + bestFitAdjustment) };
 
 		/* Get the header from this aligned address */
 		Header* const pHeader{ reinterpret_cast<Header*>(alignedAddress - sizeof(Header)) };
