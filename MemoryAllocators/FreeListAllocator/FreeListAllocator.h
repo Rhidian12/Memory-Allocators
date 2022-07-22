@@ -212,6 +212,8 @@ public:
 		--Size;
 	}
 
+	size_t capacity() const { return Capacity; }
+
 private:
 	Block* pFreeBlocks;
 	size_t Size;
