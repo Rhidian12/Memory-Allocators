@@ -210,6 +210,9 @@ public:
 	size_t capacity() const { return Capacity; }
 	size_t size() const { return Size; }
 
+	void* begin() { return pFreeBlocks; }
+	void* end() { return reinterpret_cast<void*>(reinterpret_cast<size_t>(pFreeBlocks) + Capacity); }
+
 private:
 	Block* pFreeBlocks;
 	size_t Size;
