@@ -123,6 +123,9 @@ TEST_CASE("FreeList Allocator Test")
 
 		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
 
+		pArr = alloc.allocate<int>(10);
+		REQUIRE(pArr != nullptr);
+
 		for (int i{}; i < 10; ++i)
 		{
 			REQUIRE(pArr + i != nullptr);
@@ -134,6 +137,7 @@ TEST_CASE("FreeList Allocator Test")
 			REQUIRE(pArr[i] == i);
 		}
 
+		REQUIRE_NOTHROW(alloc.deallocate(pArr));
 		REQUIRE_THROWS_AS(alloc.deallocate(nullptr), std::invalid_argument);
 
 		/* Deallocating memory not allocated by this allocator is UB */
