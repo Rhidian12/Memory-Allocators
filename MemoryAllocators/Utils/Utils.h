@@ -6,7 +6,7 @@ namespace Utils
 	inline bool IsPowerOfTwo(const size_t val) { return (val & (val - 1)) == 0; }
 
 	/* https://indiegamedev.net/2022/03/27/custom-c20-memory-allocators-for-stl-containers/ */
-	size_t AlignForward(const void* const p, const size_t alignment)
+	inline size_t AlignForward(const void* const p, const size_t alignment)
 	{
 		// Example: Suppose p = 12 == 0xC. and alignment = 8 == 0x8
 		// (12 + (8 - 1)) & ~(8 - 1)
