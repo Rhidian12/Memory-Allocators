@@ -21,3 +21,26 @@ FreeListAllocator::~FreeListAllocator()
 {
 	free(pStart);
 }
+
+FreeListAllocator::FreeListAllocator(FreeListAllocator&& other) noexcept
+	: pStart{ std::move(other.pStart) }
+	, pFreeBlocks{ std::move(other.pFreeBlocks) }
+	, Size{ std::move(other.Size) }
+	, Capacity{ std::move(other.Capacity) }
+{
+	other.pStart = nullptr;
+	other.pFreeBlocks = nullptr;
+}
+
+FreeListAllocator& FreeListAllocator::operator=(FreeListAllocator&& other) noexcept
+{
+	pStart = std::move(other.pStart);
+	pFreeBlocks = std::move(other.pFreeBlocks);
+	Size = std::move(other.Size);
+	Capacity = std::move(other.Capacity);
+
+	other.pStart = nullptr;
+	other.pFreeBlocks = nullptr;
+
+	return *this;
+}
