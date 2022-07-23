@@ -18,4 +18,24 @@ namespace Utils
 
 		return (reinterpret_cast<size_t>(p) + (alignment - 1)) & ~(alignment - 1) - reinterpret_cast<size_t>(p);
 	}
+
+	template<typename T>
+	size_t AlignForward(const void* const p, const size_t alignment)
+	{
+		size_t adjustment = AlignForward(p, alignment);
+
+		size_t neededSpace = sizeof(T);
+
+		if (adjustment < neededSpace)
+		{
+			neededSpace -= adjustment;
+
+			adjustment += alignment * (neededSpace / alignment);
+
+			if (neededSpace % alignment > 0)
+				adjustment += alignment;
+		}
+
+		return adjustment;
+	}
 }

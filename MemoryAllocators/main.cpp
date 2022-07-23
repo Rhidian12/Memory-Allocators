@@ -110,37 +110,67 @@ TEST_CASE("FreeList Allocator Test")
 {
 	SECTION("Non-STL use")
 	{
-		FreeListAllocator alloc{ 57 }; /* 40 for 10 integers + 16 for the allocation header */
-
-		REQUIRE(alloc.capacity() != 0);
-		REQUIRE(alloc.capacity() == 57);
-		REQUIRE(alloc.size() == 0);
-
-		int* pArr{};
-		REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
-		REQUIRE(alloc.size() == 1);
-		REQUIRE_NOTHROW(alloc.deallocate(pArr));
-
-		REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
-
-		pArr = alloc.allocate<int>(10);
-		REQUIRE(pArr != nullptr);
-
-		for (int i{}; i < 10; ++i)
 		{
-			REQUIRE(pArr + i != nullptr);
-			REQUIRE(pArr + i < alloc.end());
-			pArr[i] = i;
-		}
+			FreeListAllocator alloc{ 57 }; /* 40 for 10 integers + 16 for the allocation header + 1 for space */
 
-		for (int i{}; i < 10; ++i)
-		{
-			REQUIRE(pArr[i] == i);
-		}
+			REQUIRE(alloc.capacity() != 0);
+			REQUIRE(alloc.capacity() == 57);
+			REQUIRE(alloc.size() == 0);
 
-		REQUIRE_NOTHROW(alloc.deallocate(pArr));
-		REQUIRE_THROWS_AS(alloc.deallocate(nullptr), std::invalid_argument);
+			int* pArr{};
+			REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
+			REQUIRE(alloc.size() == 1);
+			REQUIRE_NOTHROW(alloc.deallocate(pArr));
+
+			REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
+
+			pArr = alloc.allocate<int>(10);
+			REQUIRE(pArr != nullptr);
+
+			for (int i{}; i < 10; ++i)
+			{
+				REQUIRE(pArr + i != nullptr);
+				REQUIRE(pArr + i < alloc.end());
+				pArr[i] = i;
+			}
+
+			for (int i{}; i < 10; ++i)
+			{
+				REQUIRE(pArr[i] == i);
+			}
+
+			REQUIRE_NOTHROW(alloc.deallocate(pArr));
+			pArr = nullptr;
+			REQUIRE_THROWS_AS(alloc.deallocate(nullptr), std::invalid_argument);
+		}
 
 		/* Deallocating memory not allocated by this allocator is UB */
+
+		{
+			FreeListAllocator alloc{ 63 }; /* 12 for 3 integers + 48 for the allocation headers + 3 for space */
+
+			REQUIRE(alloc.capacity() == 63);
+			REQUIRE(alloc.size() == 0);
+
+			int* pOne{}, * pTwo{}, * pThree{};
+
+			REQUIRE_NOTHROW(pOne = alloc.allocate<int>(1));
+			REQUIRE(alloc.size() == 1);
+
+			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1));
+			REQUIRE(alloc.size() == 2);
+
+			REQUIRE_NOTHROW(pThree = alloc.allocate<int>(1));
+			REQUIRE(alloc.size() == 3);
+
+			REQUIRE_NOTHROW(alloc.deallocate(pTwo));
+			pTwo = nullptr;
+
+			/* There should now be a free block of memory between pOne and pThree */
+
+			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1));
+			REQUIRE(pTwo > pOne);
+			REQUIRE(pTwo < pThree);
+		}
 	}
 }

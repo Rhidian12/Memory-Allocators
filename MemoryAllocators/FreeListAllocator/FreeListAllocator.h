@@ -51,7 +51,7 @@ public:
 		while (pFreeBlock)
 		{
 			/* Alignment adjustment needed to store the Header */
-			const size_t adjustment{ Utils::AlignForward(pFreeBlock, alignment) + sizeof(Header) };
+			const size_t adjustment{ Utils::AlignForward<Header>(pFreeBlock, alignment) };
 
 			/* Calculate total size */
 			const size_t totalSize{ nrOfElements * sizeof(T) + adjustment };
