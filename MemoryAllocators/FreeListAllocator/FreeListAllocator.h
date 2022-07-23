@@ -57,7 +57,7 @@ public:
 			const size_t totalSize{ nrOfElements * sizeof(T) + adjustment };
 
 			/* Is the current block a better fit than the current best fit? */
-			if (pFreeBlock->Size > totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
+			if (pFreeBlock->Size >= totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
 			{
 				pPreviousBestFit = pPreviousBlock;
 				pBestFit = pFreeBlock;
