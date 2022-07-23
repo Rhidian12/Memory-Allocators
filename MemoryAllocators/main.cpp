@@ -177,7 +177,7 @@ TEST_CASE("FreeList Allocator Test")
 	{
 		SECTION("STL use")
 		{
-			FreeListAllocator alloc{ 700 }; /* Give it more than enough memory */
+			FreeListAllocator alloc{ 33 }; /* Give it more than enough memory */
 			std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
 
 			for (int i{}; i < 10; ++i)
