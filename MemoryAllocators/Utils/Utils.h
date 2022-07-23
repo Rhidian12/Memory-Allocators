@@ -8,7 +8,7 @@ namespace Utils
 	/* https://indiegamedev.net/2022/03/27/custom-c20-memory-allocators-for-stl-containers/ */
 	inline size_t AlignForward(const void* const p, const size_t alignment)
 	{
-		// Example: Suppose p = 12 == 0xC. and alignment = 8 == 0x8
+		// Example: Suppose p = 12 == 0xC and alignment = 8 == 0x8
 		// (12 + (8 - 1)) & ~(8 - 1)
 		// 19 & ~7
 		// 0x0013 & ~0x0007
@@ -16,6 +16,9 @@ namespace Utils
 		// 0x0010
 		// 16
 
-		return (reinterpret_cast<size_t>(p) + (alignment - 1)) & ~(alignment - 1);
+		auto i = (reinterpret_cast<size_t>(p) + (alignment - 1)) & ~(alignment - 1);
+		auto j = reinterpret_cast<size_t>(p);
+
+		return i - j;
 	}
 }
