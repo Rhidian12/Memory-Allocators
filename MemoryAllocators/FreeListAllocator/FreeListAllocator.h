@@ -210,10 +210,7 @@ public:
 	size_t capacity() const { return Capacity; }
 	size_t size() const { return Size; }
 
-	void* begin() { return pStart; }
-	void* end()
-	{
-		return reinterpret_cast<void*>(reinterpret_cast<size_t>(pStart) + Capacity); }
+	void* buffer() { return pStart; }
 
 private:
 	void* pStart;
