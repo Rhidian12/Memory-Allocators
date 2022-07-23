@@ -6,6 +6,8 @@
 
 #include "../Utils/Utils.h"
 
+/* reference: https://indiegamedev.net/2022/03/27/custom-c20-memory-allocators-for-stl-containers/ */
+
 struct Block final
 {
 	size_t Size;
