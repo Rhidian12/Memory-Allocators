@@ -87,7 +87,7 @@ public:
 			/* Split the block into memory for the allocation and the remainder */
 
 			/* New block starts at best fit + size */
-			Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<char*>(pBestFit) + bestFitTotalSize) };
+			Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pBestFit) + bestFitTotalSize) };
 
 			/* The new block has the remaining size */
 			pNewBlock->Size = pBestFit->Size - bestFitTotalSize;
@@ -122,7 +122,7 @@ public:
 		}
 
 		/* Get the aligned address */
-		const size_t alignedAddress{ reinterpret_cast<size_t>(reinterpret_cast<char*>(pBestFit) + bestFitAdjustment) };
+		const size_t alignedAddress{ reinterpret_cast<size_t>(pBestFit) + bestFitAdjustment };
 
 		/* Get the header from this aligned address */
 		Header* const pHeader{ reinterpret_cast<Header*>(alignedAddress - sizeof(Header)) };
@@ -143,10 +143,10 @@ public:
 		}
 
 		/* Get the header from the memory we allocated */
-		Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<char*>(p) - sizeof(Header)) };
+		Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<size_t>(p) - sizeof(Header)) };
 
 		/* Get the actual start of the allocation by moving backwards the amount specified by the header */
-		const size_t blockStart{ reinterpret_cast<size_t>(reinterpret_cast<char*>(p) - pHeader->Adjustment) };
+		const size_t blockStart{ reinterpret_cast<size_t>(reinterpret_cast<size_t>(p) - pHeader->Adjustment) };
 		const size_t blockSize{ pHeader->Size };
 		const size_t blockEnd{ blockStart + blockSize };
 
@@ -174,7 +174,7 @@ public:
 
 			pFreeBlocks = pPreviousFreeBlock;
 		}
-		else if (reinterpret_cast<size_t>(reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size) == blockStart)
+		else if (reinterpret_cast<size_t>(pPreviousFreeBlock) + pPreviousFreeBlock->Size == blockStart)
 		{
 			/* The block before (pPreviousFreeBlock) the block we're freeing (pFreeBlock) ends right on the boundary of the heap of allocated memory */
 			/* So we can merge the previous block and our heap of allocated memory together */
@@ -196,7 +196,7 @@ public:
 			pPreviousFreeBlock = pTemp;
 		}
 
-		if (reinterpret_cast<size_t>(reinterpret_cast<char*>(pPreviousFreeBlock) + pPreviousFreeBlock->Size) ==
+		if (reinterpret_cast<size_t>(pPreviousFreeBlock) + pPreviousFreeBlock->Size ==
 			reinterpret_cast<size_t>(pPreviousFreeBlock->pNext))
 		{
 			/* The new or merged block ends right on the next block of list, so we can merge these again */
