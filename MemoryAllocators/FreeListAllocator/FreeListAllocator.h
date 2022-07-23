@@ -223,3 +223,45 @@ private:
 	size_t Capacity;
 };
 
+template<typename T, typename Allocator>
+class STLFreeListAllocator final
+{
+public:
+	using value_type = T;
+
+	STLFreeListAllocator() = delete;
+	STLFreeListAllocator(Allocator& alloc)
+		: _Allocator{ alloc }
+	{}
+	template<typename U>
+	STLFreeListAllocator(const STLFreeListAllocator<U, Allocator>& other) noexcept
+		: _Allocator(other._Allocator)
+	{}
+
+	T* allocate(const size_t nrOfElements)
+	{
+		return _Allocator.allocate<T>(nrOfElements);
+	}
+
+	void deallocate(T* p, [[maybe_unused]] size_t)
+	{
+		_Allocator.deallocate<T>(p);
+	}
+
+	T* buffer() const
+	{
+		return reinterpret_cast<T*>(_Allocator.buffer());
+	}
+
+	bool operator==(const STLFreeListAllocator<T, Allocator>& rhs) const noexcept
+	{
+		return buffer() == rhs.buffer();
+	}
+
+	bool operator!=(const STLFreeListAllocator<T, Allocator>& rhs) const noexcept
+	{
+		return buffer() != rhs.buffer();
+	}
+
+	Allocator& _Allocator;
+};
