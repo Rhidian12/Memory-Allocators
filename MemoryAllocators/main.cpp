@@ -130,7 +130,6 @@ TEST_CASE("FreeList Allocator Test")
 			for (int i{}; i < 10; ++i)
 			{
 				REQUIRE(pArr + i != nullptr);
-				REQUIRE(pArr + i < alloc.end());
 				pArr[i] = i;
 			}
 
