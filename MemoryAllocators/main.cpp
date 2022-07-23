@@ -118,13 +118,13 @@ TEST_CASE("FreeList Allocator Test")
 			REQUIRE(alloc.size() == 0);
 
 			int* pArr{};
-			REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10));
+			REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10_elem));
 			REQUIRE(alloc.size() == 1);
 			REQUIRE_NOTHROW(alloc.deallocate(pArr));
 
-			REQUIRE_THROWS_AS(alloc.allocate<int>(11), std::bad_alloc);
+			REQUIRE_THROWS_AS(alloc.allocate<int>(11_elem), std::bad_alloc);
 
-			pArr = alloc.allocate<int>(10);
+			pArr = alloc.allocate<int>(10_elem);
 			REQUIRE(pArr != nullptr);
 
 			for (int i{}; i < 10; ++i)
@@ -153,13 +153,13 @@ TEST_CASE("FreeList Allocator Test")
 
 			int* pOne{}, * pTwo{}, * pThree{};
 
-			REQUIRE_NOTHROW(pOne = alloc.allocate<int>(1));
+			REQUIRE_NOTHROW(pOne = alloc.allocate<int>(1_elem));
 			REQUIRE(alloc.size() == 1);
 
-			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1));
+			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1_elem));
 			REQUIRE(alloc.size() == 2);
 
-			REQUIRE_NOTHROW(pThree = alloc.allocate<int>(1));
+			REQUIRE_NOTHROW(pThree = alloc.allocate<int>(1_elem));
 			REQUIRE(alloc.size() == 3);
 
 			REQUIRE_NOTHROW(alloc.deallocate(pTwo));
@@ -167,7 +167,7 @@ TEST_CASE("FreeList Allocator Test")
 
 			/* There should now be a free block of memory between pOne and pThree */
 
-			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1));
+			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1_elem));
 			REQUIRE(pTwo > pOne);
 			REQUIRE(pTwo < pThree);
 		}

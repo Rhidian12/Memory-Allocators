@@ -20,6 +20,20 @@ struct Header final
 	size_t Adjustment;
 };
 
+struct NrOfElements final
+{
+	explicit NrOfElements(const size_t n)
+		: NumberOfElements{ n }
+	{}
+
+	size_t NumberOfElements;
+};
+
+NrOfElements operator"" _elem(const size_t n)
+{
+	return NrOfElements(n);
+}
+
 class FreeListAllocator final
 {
 public:
@@ -34,9 +48,9 @@ public:
 	FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
 
 	template<typename T>
-	T* allocate(const size_t nrOfElements, const size_t alignment = sizeof(size_t))
+	T* allocate(const NrOfElements nrOfElements, const size_t alignment = sizeof(size_t))
 	{
-		if (nrOfElements == 0)
+		if (nrOfElements.NumberOfElements == 0)
 		{
 			throw std::invalid_argument{ "FreeListAllocator::Allocate() > Cannot allocate 0 elements" };
 		}
@@ -56,7 +70,7 @@ public:
 			const size_t adjustment{ Utils::AlignForward<Header>(pFreeBlock, alignment) };
 
 			/* Calculate total size */
-			const size_t totalSize{ nrOfElements * sizeof(T) + adjustment };
+			const size_t totalSize{ nrOfElements.NumberOfElements * sizeof(T) + adjustment };
 
 			/* Is the current block a better fit than the current best fit? */
 			if (pFreeBlock->Size >= totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
@@ -215,6 +229,11 @@ public:
 	void* buffer() { return pStart; }
 
 private:
+	void Reallocate(const size_t newCapacity)
+	{
+
+	}
+
 	void* pStart;
 
 	Block* pFreeBlocks;
@@ -239,7 +258,7 @@ public:
 
 	T* allocate(const size_t nrOfElements)
 	{
-		return _Allocator.allocate<T>(nrOfElements);
+		return _Allocator.allocate<T>(NrOfElements(nrOfElements));
 	}
 
 	void deallocate(T* p, [[maybe_unused]] size_t)
