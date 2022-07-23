@@ -242,7 +242,7 @@ public:
 
 	void deallocate(T* p, [[maybe_unused]] size_t)
 	{
-		_Allocator.deallocate<T>(p);
+		_Allocator.deallocate(p);
 	}
 
 	T* buffer() const
