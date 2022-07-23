@@ -146,7 +146,7 @@ public:
 		Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<size_t>(p) - sizeof(Header)) };
 
 		/* Get the actual start of the allocation by moving backwards the amount specified by the header */
-		const size_t blockStart{ reinterpret_cast<size_t>(reinterpret_cast<size_t>(p) - pHeader->Adjustment) };
+		const size_t blockStart{ reinterpret_cast<size_t>(p) - pHeader->Adjustment };
 		const size_t blockSize{ pHeader->Size };
 		const size_t blockEnd{ blockStart + blockSize };
 
