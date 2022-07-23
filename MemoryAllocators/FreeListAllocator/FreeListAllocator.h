@@ -165,7 +165,7 @@ public:
 			pFreeBlock = pFreeBlock->pNext;
 		}
 
-		if (!pFreeBlock)
+		if (!pPreviousFreeBlock)
 		{
 			/* There is no free block after this heap of allocated memory, so add it to the start of the list */
 			pPreviousFreeBlock = reinterpret_cast<Block*>(blockStart);
