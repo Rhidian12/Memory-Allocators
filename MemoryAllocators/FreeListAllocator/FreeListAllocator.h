@@ -151,7 +151,7 @@ public:
 		const size_t blockEnd{ blockStart + blockSize };
 
 		Block* pPreviousFreeBlock{};
-		Block* pFreeBlock{};
+		Block* pFreeBlock{ pFreeBlocks };
 
 		/* Find the first block that starts after this heap of allocated memory */
 		while (pFreeBlock)
