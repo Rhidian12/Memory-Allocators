@@ -16,9 +16,6 @@ namespace Utils
 		// 0x0010
 		// 16
 
-		auto i = (reinterpret_cast<size_t>(p) + (alignment - 1)) & ~(alignment - 1);
-		auto j = reinterpret_cast<size_t>(p);
-
-		return i - j;
+		return (reinterpret_cast<size_t>(p) + (alignment - 1)) & ~(alignment - 1) - reinterpret_cast<size_t>(p);
 	}
 }

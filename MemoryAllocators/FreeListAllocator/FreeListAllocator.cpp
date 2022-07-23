@@ -5,11 +5,13 @@ FreeListAllocator::FreeListAllocator()
 {}
 
 FreeListAllocator::FreeListAllocator(const size_t size)
-	: pFreeBlocks{}
+	: pStart{}
+	, pFreeBlocks{}
 	, Size{}
 	, Capacity{ size }
 {
-	pFreeBlocks = static_cast<Block*>(malloc(size));
+	pStart = malloc(size);
+	pFreeBlocks = static_cast<Block*>(pStart);
 
 	pFreeBlocks->pNext = nullptr;
 	pFreeBlocks->Size = size;
@@ -17,5 +19,5 @@ FreeListAllocator::FreeListAllocator(const size_t size)
 
 FreeListAllocator::~FreeListAllocator()
 {
-	free(pFreeBlocks);
+	free(pStart);
 }

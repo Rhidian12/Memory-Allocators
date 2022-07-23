@@ -51,13 +51,13 @@ public:
 		while (pFreeBlock)
 		{
 			/* Alignment adjustment needed to store the Header */
-			const size_t adjustment{ Utils::AlignForward<Header>(pFreeBlock, alignment) };
+			const size_t adjustment{ Utils::AlignForward(pFreeBlock, alignment) + sizeof(Header) };
 
 			/* Calculate total size */
 			const size_t totalSize{ nrOfElements * sizeof(T) + adjustment };
 
 			/* Is the current block a better fit than the current best fit? */
-			if (pFreeBlock->Size >= totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
+			if (pFreeBlock->Size > totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
 			{
 				pPreviousBestFit = pPreviousBlock;
 				pBestFit = pFreeBlock;
@@ -210,10 +210,14 @@ public:
 	size_t capacity() const { return Capacity; }
 	size_t size() const { return Size; }
 
-	void* begin() { return pFreeBlocks; }
-	void* end() { return reinterpret_cast<void*>(reinterpret_cast<size_t>(pFreeBlocks) + Capacity); }
+	void* begin() { return pStart; }
+	void* end()
+	{
+		return reinterpret_cast<void*>(reinterpret_cast<size_t>(pStart) + Capacity); }
 
 private:
+	void* pStart;
+
 	Block* pFreeBlocks;
 	size_t Size;
 	size_t Capacity;

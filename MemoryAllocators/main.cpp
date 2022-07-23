@@ -110,10 +110,10 @@ TEST_CASE("FreeList Allocator Test")
 {
 	SECTION("Non-STL use")
 	{
-		FreeListAllocator alloc{ 48 }; /* 40 for 10 integers + 8 for the allocation header */
+		FreeListAllocator alloc{ 57 }; /* 40 for 10 integers + 16 for the allocation header */
 
 		REQUIRE(alloc.capacity() != 0);
-		REQUIRE(alloc.capacity() == 48);
+		REQUIRE(alloc.capacity() == 57);
 		REQUIRE(alloc.size() == 0);
 
 		int* pArr{};
@@ -129,6 +129,7 @@ TEST_CASE("FreeList Allocator Test")
 		for (int i{}; i < 10; ++i)
 		{
 			REQUIRE(pArr + i != nullptr);
+			REQUIRE(pArr + i < alloc.end());
 			pArr[i] = i;
 		}
 
