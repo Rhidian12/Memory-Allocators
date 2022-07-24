@@ -256,6 +256,8 @@ private:
 
 		DeleteData<T>(pOldBlocks);
 		free(pOldBlocks);
+
+		Capacity = newCapacity;
 	}
 
 	template<typename T>
