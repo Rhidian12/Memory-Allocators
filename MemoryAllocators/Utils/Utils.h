@@ -33,7 +33,9 @@ namespace Utils
 			adjustment += alignment * (neededSpace / alignment);
 
 			if (neededSpace % alignment > 0)
+			{
 				adjustment += alignment;
+			}
 		}
 
 		return adjustment;
