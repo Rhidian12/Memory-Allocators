@@ -29,7 +29,7 @@ struct NrOfElements final
 	size_t NumberOfElements;
 };
 
-NrOfElements operator"" _elem(const size_t n)
+inline NrOfElements operator"" _elem(const size_t n)
 {
 	return NrOfElements(n);
 }
