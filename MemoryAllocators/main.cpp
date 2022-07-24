@@ -111,10 +111,10 @@ TEST_CASE("FreeList Allocator Test")
 	SECTION("Non-STL use")
 	{
 		{
-			FreeListAllocator alloc{ 57 }; /* 40 for 10 integers + 16 for the allocation header + 1 for space */
+			FreeListAllocator alloc{ 73 }; /* 40 for 10 integers + 32 for the allocation header + 1 for space */
 
 			REQUIRE(alloc.capacity() != 0);
-			REQUIRE(alloc.capacity() == 57);
+			REQUIRE(alloc.capacity() == 73);
 			REQUIRE(alloc.size() == 0);
 
 			int* pArr{};
@@ -146,9 +146,9 @@ TEST_CASE("FreeList Allocator Test")
 		/* Deallocating memory not allocated by this allocator is UB */
 
 		{
-			FreeListAllocator alloc{ 63 }; /* 12 for 3 integers + 48 for the allocation headers + 3 for space */
+			FreeListAllocator alloc{ 111 }; /* 12 for 3 integers + 96 for the allocation headers + 3 for space */
 
-			REQUIRE(alloc.capacity() == 63);
+			REQUIRE(alloc.capacity() == 111);
 			REQUIRE(alloc.size() == 0);
 
 			int* pOne{}, * pTwo{}, * pThree{};
@@ -179,6 +179,8 @@ TEST_CASE("FreeList Allocator Test")
 		{
 			FreeListAllocator alloc{ 33 }; /* Don't give it enough memory */
 			std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
+
+			auto a = static_cast<Block*>(alloc.buffer());
 
 			for (int i{}; i < 10; ++i)
 			{
