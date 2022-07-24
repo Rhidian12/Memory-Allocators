@@ -48,7 +48,7 @@ public:
 	FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
 
 	template<typename T>
-	T* allocate(const NrOfElements nrOfElements, const size_t alignment = sizeof(size_t))
+	T* allocate(const NrOfElements nrOfElements, bool bAllowReallocation = false, const size_t alignment = sizeof(size_t))
 	{
 		if (nrOfElements.NumberOfElements == 0)
 		{
@@ -67,22 +67,19 @@ public:
 		while (pFreeBlock)
 		{
 			/* Alignment adjustment needed to store the Header */
-			const size_t adjustment{ Utils::AlignForward<Header>(pFreeBlock, alignment) };
+			bestFitAdjustment = Utils::AlignForward<Header>(pFreeBlock, alignment);
 
 			/* Calculate total size */
-			const size_t totalSize{ nrOfElements.NumberOfElements * sizeof(T) + adjustment };
+			bestFitTotalSize = nrOfElements.NumberOfElements * sizeof(T) + bestFitAdjustment;
 
 			/* Is the current block a better fit than the current best fit? */
-			if (pFreeBlock->Size >= totalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
+			if (pFreeBlock->Size >= bestFitTotalSize && (!pBestFit || pFreeBlock->Size < pBestFit->Size))
 			{
 				pPreviousBestFit = pPreviousBlock;
 				pBestFit = pFreeBlock;
 
-				bestFitAdjustment = adjustment;
-				bestFitTotalSize = totalSize;
-
 				/* Is the new current block a perfect fit? */
-				if (pFreeBlock->Size == totalSize)
+				if (pFreeBlock->Size == bestFitTotalSize)
 				{
 					break;
 				}
@@ -94,7 +91,14 @@ public:
 
 		if (!pBestFit)
 		{
-			throw std::bad_alloc{};
+			if (bAllowReallocation)
+			{
+				Reallocate<T>(Capacity * 2 + bestFitTotalSize);
+			}
+			else
+			{
+				throw std::bad_alloc{};
+			}
 		}
 
 		/* Can the best fit be split into two parts? */
@@ -249,7 +253,7 @@ private:
 			pBlock = pBlock->pNext;
 		}
 
-		DeleteData(pOldBlocks);
+		DeleteData<T>(pOldBlocks);
 		free(pOldBlocks);
 	}
 
@@ -292,7 +296,7 @@ public:
 
 	T* allocate(const size_t nrOfElements)
 	{
-		return _Allocator.allocate<T>(NrOfElements(nrOfElements));
+		return _Allocator.allocate<T>(NrOfElements(nrOfElements), true, alignof(T));
 	}
 
 	void deallocate(T* p, [[maybe_unused]] size_t)
