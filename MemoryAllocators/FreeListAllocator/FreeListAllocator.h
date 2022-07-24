@@ -67,7 +67,7 @@ public:
 		while (pFreeBlock)
 		{
 			/* Alignment adjustment needed to store the Header */
-			bestFitAdjustment = Utils::AlignForward<Header>(pFreeBlock, alignment);
+			bestFitAdjustment = Utils::AlignForward<Header, Block>(pFreeBlock, alignment);
 
 			/* Calculate total size */
 			bestFitTotalSize = nrOfElements.NumberOfElements * sizeof(T) + bestFitAdjustment;
@@ -237,27 +237,39 @@ private:
 	template<typename T>
 	void Reallocate(const size_t newCapacity)
 	{
-		Block* pOldBlocks{ pFreeBlocks };
+		const size_t oldCapacity{ Capacity };
+		Capacity = newCapacity;
+
+		Block* pOldBlocks{ static_cast<Block*>(pStart) };
 		Block* pOldBlock{ pOldBlocks };
 
 		pStart = malloc(newCapacity);
 		pFreeBlocks = static_cast<Block*>(pStart);
 
 		Block* pBlock{ pFreeBlocks };
+		Block* pPreviousBlock{};
 
 		while (pOldBlock)
 		{
 			pBlock->Size = pOldBlock->Size;
+			/* TODO we're pointing to memory that's about to be freed!!!! INVALID MEMORY MAKE NEW NODE */
 			pBlock->pNext = pOldBlock->pNext;
+
+			pPreviousBlock = pBlock;
 
 			pOldBlock = pOldBlock->pNext;
 			pBlock = pBlock->pNext;
 		}
 
+		/* Make a new block at the end of the list with the remaining size of the new capacity */
+		Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pFreeBlocks) + oldCapacity) };
+		pNewBlock->Size = newCapacity - oldCapacity;
+		pNewBlock->pNext = nullptr;
+
+		pPreviousBlock->pNext = pNewBlock;
+
 		DeleteData<T>(pOldBlocks);
 		free(pOldBlocks);
-
-		Capacity = newCapacity;
 	}
 
 	template<typename T>
