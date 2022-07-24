@@ -94,6 +94,7 @@ public:
 			if (bAllowReallocation)
 			{
 				Reallocate<T>(Capacity * 2 + bestFitTotalSize);
+				return allocate<T>(nrOfElements, true, alignment);
 			}
 			else
 			{
