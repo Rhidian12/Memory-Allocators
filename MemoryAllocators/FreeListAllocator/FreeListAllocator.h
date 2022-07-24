@@ -229,9 +229,43 @@ public:
 	void* buffer() { return pStart; }
 
 private:
+	template<typename T>
 	void Reallocate(const size_t newCapacity)
 	{
+		Block* pOldBlocks{ pFreeBlocks };
+		Block* pOldBlock{ pOldBlocks };
 
+		pStart = malloc(newCapacity);
+		pFreeBlocks = static_cast<Block*>(pStart);
+
+		Block* pBlock{ pFreeBlocks };
+
+		while (pOldBlock)
+		{
+			pBlock->Size = pOldBlock->Size;
+			pBlock->pNext = pOldBlock->pNext;
+
+			pOldBlock = pOldBlock->pNext;
+			pBlock = pBlock->pNext;
+		}
+
+		DeleteData(pOldBlocks);
+		free(pOldBlocks);
+	}
+
+	template<typename T>
+	void DeleteData(Block* pStart)
+	{
+		while (pStart)
+		{
+			Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<size_t>(pStart) - sizeof(Header)) };
+
+			T* const pTemp{ reinterpret_cast<T*>(reinterpret_cast<size_t>(pStart) + sizeof(Header) + pHeader->Adjustment) };
+
+			pTemp->~T();
+
+			pStart = pStart->pNext;
+		}
 	}
 
 	void* pStart;
