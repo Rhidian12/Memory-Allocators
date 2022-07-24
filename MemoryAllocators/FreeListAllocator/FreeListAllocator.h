@@ -246,23 +246,34 @@ private:
 		pStart = malloc(newCapacity);
 		pFreeBlocks = static_cast<Block*>(pStart);
 
-		Block* pBlock{ pFreeBlocks };
-		Block* pPreviousBlock{};
+		Block* pPreviousBlock{ pFreeBlocks };
+
+		/* Initialise first node */
+		if (pOldBlock)
+		{
+			pPreviousBlock->pNext = nullptr;
+			pPreviousBlock->Size = pOldBlock->Size;
+		}
 
 		while (pOldBlock)
 		{
-			pBlock->Size = pOldBlock->Size;
-			/* TODO we're pointing to memory that's about to be freed!!!! INVALID MEMORY MAKE NEW NODE */
-			pBlock->pNext = pOldBlock->pNext;
+			/* Make a new node */
+			Block* const pTemp{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pPreviousBlock) + pOldBlock->Size) };
 
-			pPreviousBlock = pBlock;
+			/* Populate new node */
+			pTemp->pNext = nullptr;
+			pTemp->Size = pOldBlock->Size;
 
+			/* Connect to new node */
+			pPreviousBlock->pNext = pTemp;
+
+			/* Further loop */
 			pOldBlock = pOldBlock->pNext;
-			pBlock = pBlock->pNext;
+			pPreviousBlock = pPreviousBlock->pNext;
 		}
 
 		/* Make a new block at the end of the list with the remaining size of the new capacity */
-		Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pFreeBlocks) + oldCapacity) };
+		Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pPreviousBlock) + pPreviousBlock->Size) };
 		pNewBlock->Size = newCapacity - oldCapacity;
 		pNewBlock->pNext = nullptr;
 
