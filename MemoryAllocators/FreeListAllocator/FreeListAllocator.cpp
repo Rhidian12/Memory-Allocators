@@ -1,46 +1,73 @@
 #include "FreeListAllocator.h"
 
 FreeListAllocator::FreeListAllocator()
-	: FreeListAllocator(256)
+	: FreeListAllocator(64, 20) /* arbitrary numbers */
 {}
 
-FreeListAllocator::FreeListAllocator(const size_t size)
-	: pStart{}
-	, pFreeBlocks{}
-	, Size{}
-	, Capacity{ size }
+FreeListAllocator::FreeListAllocator(const size_t sizeOfBlock, const size_t nrOfBlocks)
+	: pBlocks{}
+	, pStart{}
+	, NrOfBlocks{ nrOfBlocks }
 {
-	pStart = malloc(size);
-	pFreeBlocks = static_cast<Block*>(pStart);
+	if (nrOfBlocks == 0)
+	{
+		throw std::invalid_argument{ "Allocator needs more than 0 blocks" };
+	}
 
-	pFreeBlocks->pNext = nullptr;
-	pFreeBlocks->Size = size;
+	pBlocks = static_cast<Block*>(malloc(Utils::AlignForward<Block, Header>(sizeOfBlock, alignof(std::max_align_t))));
+	pStart = pBlocks;
+
+	pBlocks->pNext = nullptr;
+	pBlocks->Size = sizeOfBlock;
+
+	Block* pBlock{ pBlocks->pNext };
+	Block* pPreviousBlock{ pBlocks };
+
+	for (size_t i{ 1 }; i < nrOfBlocks; ++i) /* start at 1 cus we already create a block */
+	{
+		pBlock = static_cast<Block*>(malloc(Utils::AlignForward(sizeOfBlock, alignof(std::max_align_t))));
+
+		pPreviousBlock->pNext = pBlock;
+		pPreviousBlock = pBlock;
+
+		pBlock->Size = sizeOfBlock;
+		pBlock->pNext = nullptr;
+
+		pBlock = pBlock->pNext;
+	}
 }
 
 FreeListAllocator::~FreeListAllocator()
 {
-	free(pStart);
+	Block* pTemp{};
+	Block* pStartBlocks{ static_cast<Block*>(pStart) };
+
+	while (pStartBlocks)
+	{
+		pTemp = pStartBlocks;
+		pStartBlocks = pStartBlocks->pNext;
+
+		free(pTemp);
+	}
 }
 
 FreeListAllocator::FreeListAllocator(FreeListAllocator&& other) noexcept
-	: pStart{ std::move(other.pStart) }
-	, pFreeBlocks{ std::move(other.pFreeBlocks) }
-	, Size{ std::move(other.Size) }
-	, Capacity{ std::move(other.Capacity) }
+	: pBlocks{ std::move(other.pBlocks) }
+	, pStart{ std::move(other.pStart) }
+	, NrOfBlocks{std::move(other.NrOfBlocks)}
 {
+	other.pBlocks = nullptr;
 	other.pStart = nullptr;
-	other.pFreeBlocks = nullptr;
 }
 
 FreeListAllocator& FreeListAllocator::operator=(FreeListAllocator&& other) noexcept
 {
+	pBlocks = std::move(other.pBlocks);
 	pStart = std::move(other.pStart);
-	pFreeBlocks = std::move(other.pFreeBlocks);
-	Size = std::move(other.Size);
-	Capacity = std::move(other.Capacity);
+	NrOfBlocks = std::move(other.NrOfBlocks);
 
+	other.pBlocks = nullptr;
 	other.pStart = nullptr;
-	other.pFreeBlocks = nullptr;
 
 	return *this;
 }

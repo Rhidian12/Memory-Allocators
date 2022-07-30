@@ -3,6 +3,7 @@
 #include <memory> /* std::distance() */
 #include <stdexcept> /* std::invalid_argument */
 #include <assert.h> /* assert() */
+#include <iostream>
 
 #include "../Utils/Utils.h"
 
@@ -38,7 +39,7 @@ class FreeListAllocator final
 {
 public:
 	explicit FreeListAllocator();
-	explicit FreeListAllocator(const size_t size);
+	explicit FreeListAllocator(const size_t sizeOfBlock, const size_t nrOfBlocks);
 
 	~FreeListAllocator();
 
@@ -56,7 +57,7 @@ public:
 		}
 
 		Block* pPreviousBlock = nullptr;
-		Block* pFreeBlock = pFreeBlocks;
+		Block* pFreeBlock = pBlocks;
 
 		Block* pPreviousBestFit = nullptr;
 		Block* pBestFit = nullptr;
@@ -93,8 +94,7 @@ public:
 		{
 			if (bAllowReallocation)
 			{
-				Reallocate<T>(Capacity * 2 + bestFitTotalSize);
-				return allocate<T>(nrOfElements, true, alignment);
+				pBestFit = CreateNewBlocks(bestFitTotalSize, NrOfBlocks * 2, alignment);
 			}
 			else
 			{
@@ -123,7 +123,7 @@ public:
 			}
 			else
 			{
-				pFreeBlocks = pNewBlock;
+				pBlocks = pNewBlock;
 			}
 		}
 		else /* we can't split it into two */
@@ -138,7 +138,7 @@ public:
 			}
 			else
 			{
-				pFreeBlocks = pBestFit->pNext;
+				pBlocks = pBestFit->pNext;
 			}
 		}
 
@@ -151,11 +151,10 @@ public:
 		pHeader->Size = bestFitTotalSize;
 		pHeader->Adjustment = bestFitAdjustment;
 
-		++Size;
-
 		return reinterpret_cast<T*>(alignedAddress);
 	}
 
+	template<typename T>
 	void deallocate(void* p)
 	{
 		if (!p)
@@ -163,8 +162,17 @@ public:
 			throw std::invalid_argument{ "FreeListAllocator::Deallocate() > pointer is null" };
 		}
 
+
+
 		/* Get the header from the memory we allocated */
 		Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<size_t>(p) - sizeof(Header)) };
+
+		if constexpr (!std::is_trivially_destructible_v<T>)
+		{
+			/* Get our aligned address we returned in allocate() */
+			T* const pTemp{ reinterpret_cast<T*>(reinterpret_cast<size_t>(p) + sizeof(Header) + pHeader->Adjustment) };
+			pTemp->~T();
+		}
 
 		/* Get the actual start of the allocation by moving backwards the amount specified by the header */
 		const size_t blockStart{ reinterpret_cast<size_t>(p) - pHeader->Adjustment };
@@ -172,7 +180,7 @@ public:
 		const size_t blockEnd{ blockStart + blockSize };
 
 		Block* pPreviousFreeBlock{};
-		Block* pFreeBlock{ pFreeBlocks };
+		Block* pFreeBlock{ pBlocks };
 
 		/* Find the first block that starts after this heap of allocated memory */
 		while (pFreeBlock)
@@ -191,9 +199,9 @@ public:
 			/* There is no free block after this heap of allocated memory, so add it to the start of the list */
 			pPreviousFreeBlock = reinterpret_cast<Block*>(blockStart);
 			pPreviousFreeBlock->Size = blockSize;
-			pPreviousFreeBlock->pNext = pFreeBlocks;
+			pPreviousFreeBlock->pNext = pBlocks;
 
-			pFreeBlocks = pPreviousFreeBlock;
+			pBlocks = pPreviousFreeBlock;
 		}
 		else if (reinterpret_cast<size_t>(pPreviousFreeBlock) + pPreviousFreeBlock->Size == blockStart)
 		{
@@ -224,77 +232,48 @@ public:
 			pPreviousFreeBlock->Size += pPreviousFreeBlock->pNext->Size;
 			pPreviousFreeBlock->pNext = pPreviousFreeBlock->pNext->pNext;
 		}
-
-		--Size;
 	}
 
-	size_t capacity() const { return Capacity; }
-	size_t size() const { return Size; }
-
-	void* buffer() { return pStart; }
+	void* buffer() { return pBlocks; }
 
 private:
-	template<typename T>
-	void Reallocate(const size_t newCapacity)
-	{
-		const size_t oldCapacity{ Capacity };
-		Capacity = newCapacity;
-
-		Block* pOldBlocks{ static_cast<Block*>(pStart) };
-		Block* pOldBlock{ pOldBlocks };
-
-		pStart = malloc(newCapacity);
-		pFreeBlocks = static_cast<Block*>(pStart);
-
-		Block* pPreviousBlock{ pFreeBlocks };
-
-		/* Initialise first node */
-		if (pOldBlock)
-		{
-			pPreviousBlock->pNext = nullptr;
-			pPreviousBlock->Size = pOldBlock->Size;
-		}
-
-		while (pOldBlock)
-		{
-			/* Make a new node */
-			Block* const pTemp{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pPreviousBlock) + pOldBlock->Size) };
-
-			/* Populate new node */
-			pTemp->pNext = nullptr;
-			pTemp->Size = pOldBlock->Size;
-
-			/* Connect to new node */
-			pPreviousBlock->pNext = pTemp;
-
-			/* Further loop */
-			pOldBlock = pOldBlock->pNext;
-			pPreviousBlock = pPreviousBlock->pNext;
-		}
-
-		/* Make a new block at the end of the list with the remaining size of the new capacity */
-		Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pPreviousBlock) + pPreviousBlock->Size) };
-		pNewBlock->Size = newCapacity - oldCapacity;
-		pNewBlock->pNext = nullptr;
-
-		pPreviousBlock->pNext = pNewBlock;
-
-		DeleteData<T>(pOldBlocks);
-		free(pOldBlocks);
-	}
-
-	template<typename T>
-	Block* CreateNewBlocks(const size_t sizeOfBlocks)
+	Block* CreateNewBlocks(const size_t sizeOfBlock, const size_t nrOfBlocks, const size_t alignment)
 	{
 		/* Find end of list */
-		Block* pBlock{ pFreeBlocks };
+		Block* pPreviousBlock{ pBlocks };
 
-		while (pBlock->pNext)
+		if (pPreviousBlock)
 		{
-			pBlock = pBlock->pNext;
+			while (pPreviousBlock->pNext)
+			{
+				pPreviousBlock = pPreviousBlock->pNext;
+			}
 		}
 
+		Block* pFirstNewBlock{};
+		for (size_t i{}; i < nrOfBlocks; ++i)
+		{
+			Block* const pNewBlock{ static_cast<Block*>(malloc(Utils::AlignForward<Header, Block>(sizeOfBlock, alignment))) };
 
+			pNewBlock->pNext = nullptr;
+			pNewBlock->Size = sizeOfBlock;
+
+			if (pPreviousBlock)
+			{
+				pPreviousBlock->pNext = pNewBlock;
+			}
+
+			pPreviousBlock = pNewBlock;
+
+			if (!pFirstNewBlock)
+			{
+				pFirstNewBlock = pNewBlock;
+			}
+		}
+
+		NrOfBlocks += nrOfBlocks;
+
+		return pFirstNewBlock;
 	}
 
 	template<typename T>
@@ -312,11 +291,9 @@ private:
 		}
 	}
 
+	Block* pBlocks;
 	void* pStart;
-
-	Block* pFreeBlocks;
-	size_t Size;
-	size_t Capacity;
+	size_t NrOfBlocks;
 };
 
 template<typename T, typename Allocator>
@@ -341,7 +318,7 @@ public:
 
 	void deallocate(T* p, [[maybe_unused]] size_t)
 	{
-		_Allocator.deallocate(p);
+		_Allocator.deallocate<T>(p);
 	}
 
 	T* buffer() const
