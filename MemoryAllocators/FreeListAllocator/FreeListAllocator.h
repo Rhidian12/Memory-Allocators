@@ -284,20 +284,6 @@ private:
 	}
 
 	template<typename T>
-	Block* CreateNewBlocks(const size_t sizeOfBlocks)
-	{
-		/* Find end of list */
-		Block* pBlock{ pFreeBlocks };
-
-		while (pBlock->pNext)
-		{
-			pBlock = pBlock->pNext;
-		}
-
-
-	}
-
-	template<typename T>
 	void DeleteData(Block* pStart)
 	{
 		while (pStart)
