@@ -19,48 +19,12 @@ namespace Utils
 		return (reinterpret_cast<size_t>(p) + (alignment - 1)) & ~(alignment - 1) - reinterpret_cast<size_t>(p);
 	}
 
-	inline size_t AlignForward(size_t v, const size_t)
-	{
-		--v;
-
-		while (v & v - 1)
-		{
-			v &= v - 1;
-		}
-
-		v = v << 1;
-
-		return v;
-	}
-
-	template<typename ... Ts>
+	template<typename ... Values>
 	size_t AlignForward(const void* const p, const size_t alignment)
 	{
 		size_t adjustment = AlignForward(p, alignment);
 
-		size_t neededSpace = (sizeof(Ts...) + ...);
-
-		if (adjustment < neededSpace)
-		{
-			neededSpace -= adjustment;
-
-			adjustment += alignment * (neededSpace / alignment);
-
-			if (neededSpace % alignment > 0)
-			{
-				adjustment += alignment;
-			}
-		}
-
-		return adjustment;
-	}
-
-	template<typename ... Ts>
-	size_t AlignForward(const size_t v, const size_t alignment)
-	{
-		size_t adjustment = AlignForward(v, alignment);
-
-		size_t neededSpace = (sizeof(Ts...) + ...);
+		size_t neededSpace = (sizeof(Values...) + ...);
 
 		if (adjustment < neededSpace)
 		{

@@ -111,11 +111,16 @@ TEST_CASE("FreeList Allocator Test")
 	SECTION("Non-STL use")
 	{
 		{
-			FreeListAllocator alloc{ 73,1 }; /* 40 for 10 integers + 32 for the allocation header + 1 for space */
+			FreeListAllocator alloc{ 73 }; /* 40 for 10 integers + 32 for the allocation header + 1 for space */
+
+			REQUIRE(alloc.capacity() != 0);
+			REQUIRE(alloc.capacity() == 73);
+			REQUIRE(alloc.size() == 0);
 
 			int* pArr{};
 			REQUIRE_NOTHROW(pArr = alloc.allocate<int>(10_elem));
-			REQUIRE_NOTHROW(alloc.deallocate<int>(pArr));
+			REQUIRE(alloc.size() == 1);
+			REQUIRE_NOTHROW(alloc.deallocate(pArr));
 
 			REQUIRE_THROWS_AS(alloc.allocate<int>(11_elem), std::bad_alloc);
 
@@ -133,59 +138,66 @@ TEST_CASE("FreeList Allocator Test")
 				REQUIRE(pArr[i] == i);
 			}
 
-			REQUIRE_NOTHROW(alloc.deallocate<int>(pArr));
+			REQUIRE_NOTHROW(alloc.deallocate(pArr));
 			pArr = nullptr;
-			REQUIRE_THROWS_AS(alloc.deallocate<void>(nullptr), std::invalid_argument);
+			REQUIRE_THROWS_AS(alloc.deallocate(nullptr), std::invalid_argument);
 		}
 
 		/* Deallocating memory not allocated by this allocator is UB */
 
 		{
-			FreeListAllocator alloc{ 37,3 }; /* 12 for 3 integers + 96 for the allocation headers + 3 for space */
+			FreeListAllocator alloc{ 111 }; /* 12 for 3 integers + 96 for the allocation headers + 3 for space */
+
+			REQUIRE(alloc.capacity() == 111);
+			REQUIRE(alloc.size() == 0);
 
 			int* pOne{}, * pTwo{}, * pThree{};
 
 			REQUIRE_NOTHROW(pOne = alloc.allocate<int>(1_elem));
+			REQUIRE(alloc.size() == 1);
 
 			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1_elem));
+			REQUIRE(alloc.size() == 2);
 
 			REQUIRE_NOTHROW(pThree = alloc.allocate<int>(1_elem));
+			REQUIRE(alloc.size() == 3);
 
-			REQUIRE_NOTHROW(alloc.deallocate<int>(pTwo));
+			REQUIRE_NOTHROW(alloc.deallocate(pTwo));
 			pTwo = nullptr;
 
-			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1_elem));
+			/* There should now be a free block of memory between pOne and pThree */
 
-			alloc.deallocate<int>(pOne);
-			alloc.deallocate<int>(pTwo);
-			alloc.deallocate<int>(pThree);
+			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1_elem));
+			REQUIRE(pTwo > pOne);
+			REQUIRE(pTwo < pThree);
 		}
 
 		{
-			FreeListAllocator alloc{ 2,1 }; /* Don't give enough memory to force a reallocation */
+			FreeListAllocator alloc{ 2 }; /* Don't give enough memory to force a reallocation */
 
-			int* pOne{}, * pTwo{};
+			REQUIRE(alloc.capacity() == 2);
+			REQUIRE(alloc.size() == 0);
+
+			int* pOne{};
 
 			REQUIRE_NOTHROW(pOne = alloc.allocate<int>(1_elem, true));
-			REQUIRE_NOTHROW(pTwo = alloc.allocate<int>(1_elem, true));
-
-			REQUIRE_NOTHROW(alloc.deallocate<int>(pOne));
-			REQUIRE_NOTHROW(alloc.deallocate<int>(pTwo));
+			REQUIRE(alloc.size() == 1);
 		}
 	}
 
-	/* Causes memory leaks */
-	// SECTION("STL use")
-	// {
-	// 	SECTION("STL use")
-	// 	{
-	// 		FreeListAllocator alloc{ 33, 1 }; /* Don't give it enough memory */
-	// 		std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
-	// 
-	// 		for (int i{}; i < 10; ++i)
-	// 		{
-	// 			REQUIRE_NOTHROW(vec.push_back(i)); /* Force a reallocation */
-	// 		}
-	// 	}
-	// }
+	//SECTION("STL use")
+	//{
+	//	SECTION("STL use")
+	//	{
+	//		FreeListAllocator alloc{ 33 }; /* Don't give it enough memory */
+	//		std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
+
+	//		auto a = static_cast<Block*>(alloc.buffer());
+
+	//		for (int i{}; i < 10; ++i)
+	//		{
+	//			REQUIRE_NOTHROW(vec.push_back(i)); /* Force a reallocation */
+	//		}
+	//	}
+	//}
 }
