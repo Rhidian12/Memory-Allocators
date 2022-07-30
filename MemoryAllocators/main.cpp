@@ -171,33 +171,21 @@ TEST_CASE("FreeList Allocator Test")
 			REQUIRE(pTwo > pOne);
 			REQUIRE(pTwo < pThree);
 		}
-
-		{
-			FreeListAllocator alloc{ 2 }; /* Don't give enough memory to force a reallocation */
-
-			REQUIRE(alloc.capacity() == 2);
-			REQUIRE(alloc.size() == 0);
-
-			int* pOne{};
-
-			REQUIRE_NOTHROW(pOne = alloc.allocate<int>(1_elem, true));
-			REQUIRE(alloc.size() == 1);
-		}
 	}
 
-	//SECTION("STL use")
-	//{
-	//	SECTION("STL use")
-	//	{
-	//		FreeListAllocator alloc{ 33 }; /* Don't give it enough memory */
-	//		std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
+	SECTION("STL use")
+	{
+		SECTION("STL use")
+		{
+			FreeListAllocator alloc{ 256 };
+			std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
 
-	//		auto a = static_cast<Block*>(alloc.buffer());
+			auto a = static_cast<Block*>(alloc.buffer());
 
-	//		for (int i{}; i < 10; ++i)
-	//		{
-	//			REQUIRE_NOTHROW(vec.push_back(i)); /* Force a reallocation */
-	//		}
-	//	}
-	//}
+			for (int i{}; i < 10; ++i)
+			{
+				REQUIRE_NOTHROW(vec.push_back(i));
+			}
+		}
+	}
 }
