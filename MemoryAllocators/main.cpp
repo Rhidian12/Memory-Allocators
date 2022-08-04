@@ -177,14 +177,14 @@ TEST_CASE("FreeList Allocator Test")
 	{
 		SECTION("STL use")
 		{
-			FreeListAllocator alloc{ 33 }; /* Don't give it enough memory */
+			FreeListAllocator alloc{ 256 };
 			std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
 
 			auto a = static_cast<Block*>(alloc.buffer());
 
 			for (int i{}; i < 10; ++i)
 			{
-				REQUIRE_NOTHROW(vec.push_back(i)); /* Force a reallocation */
+				REQUIRE_NOTHROW(vec.push_back(i));
 			}
 		}
 	}
