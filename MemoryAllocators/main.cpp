@@ -180,8 +180,6 @@ TEST_CASE("FreeList Allocator Test")
 			FreeListAllocator alloc{ 256 };
 			std::vector<int, STLFreeListAllocator<int, FreeListAllocator>> vec(alloc);
 
-			auto a = static_cast<Block*>(alloc.buffer());
-
 			for (int i{}; i < 10; ++i)
 			{
 				REQUIRE_NOTHROW(vec.push_back(i));
