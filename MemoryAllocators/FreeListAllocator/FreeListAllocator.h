@@ -48,7 +48,7 @@ public:
 	FreeListAllocator& operator=(FreeListAllocator&& other) noexcept;
 
 	template<typename T>
-	T* allocate(const NrOfElements nrOfElements, bool bAllowReallocation = false, const size_t alignment = sizeof(size_t))
+	T* allocate(const NrOfElements nrOfElements, const size_t alignment = sizeof(size_t))
 	{
 		if (nrOfElements.NumberOfElements == 0)
 		{
@@ -91,15 +91,7 @@ public:
 
 		if (!pBestFit)
 		{
-			if (bAllowReallocation)
-			{
-				Reallocate<T>(Capacity * 2 + bestFitTotalSize);
-				return allocate<T>(nrOfElements, true, alignment);
-			}
-			else
-			{
-				throw std::bad_alloc{};
-			}
+			throw std::bad_alloc{};
 		}
 
 		/* Can the best fit be split into two parts? */
@@ -234,70 +226,6 @@ public:
 	void* buffer() { return pStart; }
 
 private:
-	template<typename T>
-	void Reallocate(const size_t newCapacity)
-	{
-		const size_t oldCapacity{ Capacity };
-		Capacity = newCapacity;
-
-		Block* pOldBlocks{ static_cast<Block*>(pStart) };
-		Block* pOldBlock{ pOldBlocks };
-
-		pStart = malloc(newCapacity);
-		pFreeBlocks = static_cast<Block*>(pStart);
-
-		Block* pPreviousBlock{ pFreeBlocks };
-
-		/* Initialise first node */
-		if (pOldBlock)
-		{
-			pPreviousBlock->pNext = nullptr;
-			pPreviousBlock->Size = pOldBlock->Size;
-		}
-
-		while (pOldBlock)
-		{
-			/* Make a new node */
-			Block* const pTemp{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pPreviousBlock) + pOldBlock->Size) };
-
-			/* Populate new node */
-			pTemp->pNext = nullptr;
-			pTemp->Size = pOldBlock->Size;
-
-			/* Connect to new node */
-			pPreviousBlock->pNext = pTemp;
-
-			/* Further loop */
-			pOldBlock = pOldBlock->pNext;
-			pPreviousBlock = pPreviousBlock->pNext;
-		}
-
-		/* Make a new block at the end of the list with the remaining size of the new capacity */
-		Block* const pNewBlock{ reinterpret_cast<Block*>(reinterpret_cast<size_t>(pPreviousBlock) + pPreviousBlock->Size) };
-		pNewBlock->Size = newCapacity - oldCapacity;
-		pNewBlock->pNext = nullptr;
-
-		pPreviousBlock->pNext = pNewBlock;
-
-		DeleteData<T>(pOldBlocks);
-		free(pOldBlocks);
-	}
-
-	template<typename T>
-	void DeleteData(Block* pStart)
-	{
-		while (pStart)
-		{
-			Header* const pHeader{ reinterpret_cast<Header*>(reinterpret_cast<size_t>(pStart) - sizeof(Header)) };
-
-			T* const pTemp{ reinterpret_cast<T*>(reinterpret_cast<size_t>(pStart) + sizeof(Header) + pHeader->Adjustment) };
-
-			pTemp->~T();
-
-			pStart = pStart->pNext;
-		}
-	}
-
 	void* pStart;
 
 	Block* pFreeBlocks;
@@ -322,7 +250,7 @@ public:
 
 	T* allocate(const size_t nrOfElements)
 	{
-		return _Allocator.allocate<T>(NrOfElements(nrOfElements), true, alignof(T));
+		return _Allocator.allocate<T>(NrOfElements(nrOfElements), alignof(T));
 	}
 
 	void deallocate(T* p, [[maybe_unused]] size_t)
