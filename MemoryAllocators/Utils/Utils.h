@@ -40,4 +40,16 @@ namespace Utils
 
 		return adjustment;
 	}
+
+	size_t AlignForward(size_t p, const size_t alignment)
+	{
+		const size_t modulo = p & (alignment - 1);
+
+		if (modulo != 0)
+		{
+			p += alignment - modulo;
+		}
+
+		return p;
+	}
 }
